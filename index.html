@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DS67 - Calculador Tasa Cotización Adicional</title>
+  <style>
+    /*
+     * ════════════════════════════════════════════════════
+     *  PALETA IST — Instituto de Seguridad del Trabajo
+     *  Naranja principal : #E8501C
+     *  Azul marino       : #1A3A6B
+     *  Naranja claro     : #F47B50   (hover / tint)
+     *  Fondo página      : #F2F4F7
+     * ════════════════════════════════════════════════════
+     */
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #F2F4F7;
+      color: #1e293b;
+      overflow: hidden;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────────── */
+    .page {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+    }
+
+    /* ── HEADER ──────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #1A3A6B 0%, #25508F 100%);
+      padding: 7px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 3px solid #E8501C;
+      box-shadow: 0 2px 8px rgba(26,58,107,0.3);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    /* Franja naranja decorativa a la izquierda del título */
+    .header-left::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 36px;
+      background: #E8501C;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .header-left h1 { font-size: 1rem; font-weight: 700; color: #fff; }
+    .header-left p  { font-size: 0.67rem; color: #a8c4e8; margin-top: 1px; }
+
+    .meta-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 8px;
+      padding: 5px 12px;
+    }
+
+    .meta-bar-icon { font-size: 1.2rem; }
+    .meta-bar-label { line-height: 1.2; }
+    .meta-bar-label span:first-child {
+      display: block; font-size: 0.62rem; color: #a8c4e8;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .meta-bar-label span:last-child { font-size: 0.72rem; color: #d0e4f7; }
+
+    .meta-bar input {
+      width: 96px; padding: 5px 10px;
+      border: 2px solid #E8501C; border-radius: 6px;
+      font-size: 1.1rem; font-weight: 700; text-align: center;
+      background: white; color: #1A3A6B;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .meta-bar input::placeholder { color: #94a3b8; font-size: 0.8rem; font-weight: 400; }
+    .meta-bar input:focus {
+      outline: none; border-color: #F47B50;
+      box-shadow: 0 0 0 2px rgba(232,80,28,0.25);
+    }
+    .meta-bar input.invalida { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
+
+    .btn-reset {
+      padding: 6px 14px; background: #E8501C; color: white;
+      border: none; border-radius: 6px; font-size: 0.75rem;
+      font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
+    }
+    .btn-reset:hover { background: #c94318; }
+
+    /* ── MAIN ────────────────────────────────────────────── */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 530px;
+      gap: 10px;
+      padding: 10px 14px;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── COLUMNS ─────────────────────────────────────────── */
+    .left-col, .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+    }
+    .left-col { overflow-y: auto; }
+
+    /* ── CARDS ───────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #dde3ec;
+      padding: 10px 14px;
+      box-shadow: 0 1px 4px rgba(26,58,107,0.07);
+      flex-shrink: 0;
+    }
+
+    .card h2 {
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: #1A3A6B; margin-bottom: 7px; padding-bottom: 5px;
+      border-bottom: 2px solid #E8501C;
+    }
+
+    /* ── DATA TABLE ──────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      background: #1A3A6B; color: #fff;
+      padding: 5px 8px; text-align: center;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    th:first-child { text-align: left; border-radius: 5px 0 0 0; }
+    th:last-child  { border-radius: 0 5px 0 0; }
+
+    td {
+      padding: 4px 7px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.78rem;
+      background: #fff;
+    }
+    td:first-child {
+      font-weight: 600; color: #334155;
+      white-space: nowrap; background: #f7f9fc;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    input[type="number"] {
+      width: 100%; padding: 3px 6px;
+      border: 1px solid #c8d3e0; border-radius: 4px;
+      font-size: 0.78rem; text-align: center;
+      transition: border-color 0.15s; background: #fff; color: #1e293b;
+    }
+    input[type="number"]:focus {
+      outline: none; border-color: #E8501C;
+      box-shadow: 0 0 0 2px rgba(232,80,28,0.15);
+    }
+    input[type="number"]:read-only {
+      background: #eef2f9; color: #1A3A6B;
+      font-weight: 600; border-color: #b0c0d8; cursor: default;
+    }
+    input[type="number"]::placeholder { color: #94a3b8; }
+
+    /* Fila TS IT */
+    .ts-it-row td            { background: #eef2f9; }
+    .ts-it-row td:first-child { background: #dce6f5; color: #1A3A6B; }
+
+    .formula-note {
+      font-size: 0.65rem; color: #64748b; background: #f7f9fc;
+      border-left: 3px solid #E8501C; padding: 4px 8px;
+      border-radius: 0 3px 3px 0; margin-top: 7px;
+    }
+
+    /* ── RESULT BOXES ────────────────────────────────────── */
+    .results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
+
+    .result-box {
+      border-radius: 7px; padding: 9px 8px;
+      text-align: center; border: 1px solid #dde3ec; background: #f7f9fc;
+    }
+    .result-label {
+      font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      color: #64748b; margin-bottom: 3px;
+    }
+    .result-value { font-size: 1.4rem; font-weight: 700; color: #1e293b; line-height: 1.1; }
+    .result-sub   { font-size: 0.58rem; color: #94a3b8; margin-top: 2px; line-height: 1.3; }
+
+    /* Tasa total → azul marino IST */
+    .result-box.tasa-total             { border-color: #b0c0d8; background: #eef2f9; }
+    .result-box.tasa-total .result-value { color: #1A3A6B; }
+
+    /* Cotización → naranja IST */
+    .result-box.cotizacion             { border-color: #f5c7b3; background: #fdf2ed; }
+    .result-box.cotizacion .result-value { color: #E8501C; }
+    .result-box.cotizacion.warning     { border-color: #fed7aa; background: #fff7ed; }
+    .result-box.cotizacion.warning .result-value { color: #c2410c; }
+    .result-box.cotizacion.danger      { border-color: #fecaca; background: #fff5f5; }
+    .result-box.cotizacion.danger .result-value  { color: #b91c1c; }
+
+    /* Colchón */
+    .result-box.colchon                { border-color: #dde3ec; background: #f7f9fc; }
+    .result-box.colchon .result-value  { color: #64748b; }
+    .result-box.colchon.ok             { border-color: #bbf7d0; background: #f0fdf4; }
+    .result-box.colchon.ok .result-value { color: #15803d; }
+    .result-box.colchon.tight          { border-color: #fed7aa; background: #fff7ed; }
+    .result-box.colchon.tight .result-value { color: #c2410c; }
+    .result-box.colchon.exceeded       { border-color: #fecaca; background: #fff5f5; }
+    .result-box.colchon.exceeded .result-value { color: #b91c1c; }
+
+    /* ── TRAMOS TABLE ────────────────────────────────────── */
+    .tramos-scroll-wrap {
+      max-height: 320px;
+      overflow-y: auto;
+      border-radius: 0 0 6px 6px;
+      border: 1px solid #dde3ec;
+    }
+    .tabla-tramos { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+    .tabla-tramos thead { position: sticky; top: 0; z-index: 1; }
+    .tabla-tramos th {
+      background: #1A3A6B; color: #f1f5f9;
+      padding: 5px 7px; font-size: 0.65rem;
+    }
+    .tabla-tramos td {
+      padding: 3px 7px; text-align: center;
+      border-bottom: 1px solid #f1f5f9; background: #fff; color: #334155;
+    }
+    .tabla-tramos td:first-child { background: #f7f9fc; }
+    .td-total { font-weight: 600; color: #1A3A6B !important; background: #eef2f9 !important; }
+    .td-costo { font-weight: 600; color: #15803d !important; background: #f0fdf4 !important; }
+    .td-costo.costo-alto { color: #b91c1c !important; background: #fff5f5 !important; }
+    .tabla-tramos tr.active-tramo td {
+      background: #fdf2ed !important; color: #c94318; font-weight: 700;
+    }
+    .tabla-tramos tr.active-tramo td:first-child::after { content: ' ◀'; color: #E8501C; }
+
+    /* ── SECCIÓN IM ──────────────────────────────────────── */
+    .im-header td {
+      background: #eef2f9 !important; color: #1A3A6B !important;
+      font-size: 0.72rem; font-weight: 700;
+      padding: 6px 10px; border-bottom: 1px solid #b0c0d8 !important;
+      border-top: 2px solid #1A3A6B !important;
+      user-select: none;
+    }
+    .im-valor td:first-child { color: #374151; font-size: 0.75rem; }
+    .im-valor .valor-badge {
+      display: inline-block; background: #fde8df; color: #c94318;
+      border-radius: 3px; padding: 0 4px;
+      font-size: 0.62rem; font-weight: 700; margin-left: 4px;
+    }
+    /* Factor IM → tono naranja claro IST */
+    .factor-im-row td            { background: #fdf2ed; }
+    .factor-im-row td:first-child { background: #fde8df; color: #c94318; }
+    .factor-im-row input[type="number"]:read-only {
+      background: #fde8df; color: #c94318; border-color: #f5c7b3;
+    }
+
+    /* ── TRAMOS EXTRA (ocultos por defecto) ─────────────── */
+    .tramo-extra { display: none; }
+
+    /* ── BOTÓN TOGGLE TRAMOS ─────────────────────────────── */
+    .btn-toggle-tramos {
+      width: 100%; margin-top: 5px;
+      padding: 4px 0; font-size: 0.65rem; font-weight: 600;
+      color: #1A3A6B; background: #eef2f9;
+      border: 1px solid #b0c0d8; border-radius: 5px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-toggle-tramos:hover { background: #dce6f5; }
+
+    /* ── BOTÓN TOGGLE IM ─────────────────────────────────── */
+    .im-header td { transition: background 0.15s; }
+    .im-header:hover td { background: #dce6f5 !important; }
+    .im-header.abierto td { background: #1A3A6B !important; color: #fff !important; border-bottom-color: #1A3A6B !important; }
+    .im-header.abierto:hover td { background: #25508F !important; }
+
+    .im-toggle-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      width: 100%;
+    }
+    .im-toggle-chevron {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 4px;
+      background: #1A3A6B; color: #fff;
+      font-size: 0.7rem; flex-shrink: 0;
+      transition: transform 0.2s, background 0.15s;
+    }
+    .im-header.abierto .im-toggle-chevron { transform: rotate(180deg); background: #E8501C; }
+    .im-toggle-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3px; flex: 1; }
+    .im-toggle-hint {
+      font-size: 0.6rem; font-weight: 400; opacity: 0.7;
+      border: 1px solid currentColor; border-radius: 3px;
+      padding: 1px 5px; margin-left: 4px;
+    }
+
+    /* ── INSIGHT GRID ────────────────────────────────────── */
+    .insight-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 1fr 1.2fr;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    /* Stat cards — borde izquierdo de color, sin íconos */
+    .stat-card {
+      border-radius: 6px;
+      padding: 8px 10px;
+      border: 1px solid #dde3ec;
+      background: #f7f9fc;
+      border-left: 3px solid #b0c0d8;
+    }
+
+    .stat-label {
+      font-size: 0.58rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.45px;
+      color: #64748b; margin-bottom: 4px;
+    }
+
+    .stat-main { display: flex; align-items: baseline; gap: 4px; }
+    .stat-val  { font-size: 1.3rem; font-weight: 700; color: #1A3A6B; line-height: 1; }
+    .stat-unit { font-size: 0.62rem; color: #94a3b8; }
+    .stat-sub  { font-size: 0.6rem; color: #64748b; margin-top: 3px; line-height: 1.35; }
+
+    /* Meta */
+    .stat-meta { border-left-color: #1A3A6B; background: #eef2f9; }
+    .stat-meta .stat-val { color: #1A3A6B; }
+
+    /* Desglose — barra split IT vs IM */
+    .stat-desglose { border-left-color: #475569; }
+    .stat-split {
+      display: flex; height: 18px; border-radius: 4px;
+      overflow: hidden; margin: 4px 0 2px;
+    }
+    .split-it {
+      background: #1A3A6B; display: flex; align-items: center;
+      justify-content: center; transition: width 0.3s;
+      min-width: 0;
+    }
+    .split-im {
+      background: #E8501C; display: flex; align-items: center;
+      justify-content: center; transition: width 0.3s;
+      min-width: 0;
+    }
+    .split-it span, .split-im span {
+      font-size: 0.6rem; font-weight: 700; color: #fff;
+      white-space: nowrap; overflow: hidden; padding: 0 3px;
+    }
+
+    /* Días usados */
+    .stat-dias-usados { border-left-color: #E8501C; background: #fdf2ed; }
+    .stat-dias-usados .stat-val { color: #E8501C; }
+
+    /* Colchón P3 con barra */
+    .stat-colchon { border-left-color: #15803d; background: #f0fdf4; }
+    .stat-colchon.tight   { border-left-color: #c2410c; background: #fff7ed; }
+    .stat-colchon.exceeded { border-left-color: #b91c1c; background: #fff5f5; }
+
+    .colchon-nums { display: flex; align-items: baseline; gap: 3px; margin-bottom: 2px; }
+    .colchon-usado { font-size: 1.1rem; font-weight: 700; color: #E8501C; }
+    .colchon-sep   { font-size: 0.8rem; color: #94a3b8; }
+    .colchon-max   { font-size: 1.1rem; font-weight: 700; color: #15803d; }
+    .stat-colchon.exceeded .colchon-max { color: #b91c1c; }
+
+    .colchon-resto {
+      font-size: 0.6rem; font-weight: 600; color: #15803d;
+      margin-top: 3px; text-align: right;
+    }
+    .stat-colchon.tight .colchon-resto   { color: #c2410c; }
+    .stat-colchon.exceeded .colchon-resto { color: #b91c1c; }
+
+    /* ── BARRA DE PROGRESO ───────────────────────────────── */
+    .progress-bar-bg {
+      height: 7px; border-radius: 4px;
+      background: #e2e8f0; overflow: hidden; display: flex;
+    }
+    .progress-bar-fill {
+      height: 100%; background: #E8501C;
+      transition: width 0.3s ease;
+    }
+    .progress-bar-excess {
+      height: 100%; background: #b91c1c;
+      transition: width 0.3s ease;
+    }
+
+    /* ── RECARGO MUERTE ─────────────────────────────────── */
+    .recargo-label {
+      display: flex; align-items: center; gap: 7px;
+      margin-top: 7px; padding: 5px 8px;
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: 5px; cursor: pointer;
+      font-size: 0.65rem; color: #92400e;
+    }
+    .recargo-label input[type="checkbox"] { width: 13px; height: 13px; cursor: pointer; flex-shrink: 0; }
+    .recargo-label:has(input:checked) { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+
+    /* ── AVISO ───────────────────────────────────────────── */
+    .aviso-incompleto {
+      font-size: 0.65rem; color: #92400e; background: #fffbeb;
+      border: 1px solid #fcd34d; border-radius: 4px;
+      padding: 3px 8px; margin-top: 6px; display: none;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 1200px) {
+      .main { grid-template-columns: 1fr; overflow-y: auto; }
+      html, body { overflow: auto; }
+    }
+
+    /* ── CHART ───────────────────────────────────────────── */
+    .chart-card { flex-shrink: 0; }
+
+    .chart-inner { display: flex; align-items: center; gap: 14px; }
+
+    #grafico-dona { flex-shrink: 0; }
+
+    .chart-legend { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.72rem; color: #475569;
+    }
+
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+    .legend-text strong { color: #1e293b; }
+
+    .legend-pct { font-size: 1.2rem; font-weight: 700; color: #1A3A6B; margin-top: 2px; }
+
+    /* ── BOTÓN PDF ───────────────────────────────────────── */
+    .btn-pdf {
+      padding: 6px 14px; background: #fff; color: #1A3A6B;
+      border: 2px solid rgba(255,255,255,0.5); border-radius: 6px;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, color 0.2s; white-space: nowrap;
+    }
+    .btn-pdf:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+    /* ── IMPRESIÓN ───────────────────────────────────────── */
+    @media print {
+      html, body { overflow: visible !important; height: auto !important; background: #fff !important; }
+      .page { display: block !important; height: auto !important; }
+      .header { background: #1A3A6B !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .main { display: block !important; padding: 8px !important; }
+      .left-col, .right-col { overflow: visible !important; }
+      .left-col { overflow-y: visible !important; }
+      .tramos-scroll-wrap { max-height: none !important; overflow: visible !important; }
+      .btn-pdf, .btn-reset, #btn-toggle-costo, .btn-toggle-tramos { display: none !important; }
+      .card { break-inside: avoid; box-shadow: none !important; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ───────────────────────────────────────────── -->
+  <div class="header">
+    <div class="header-left">
+      <h1>DS67 — Calculador Tasa de Cotización Adicional</h1>
+    </div>
+
+    <div class="meta-bar" id="meta-bar-cotiz">
+      <span class="meta-bar-icon">💰</span>
+      <div class="meta-bar-label">
+        <span>Cotización Base Mensual</span>
+      </div>
+      <input type="number" id="cotiz-base" min="0" step="1" placeholder="ej: 500000" oninput="actualizarCostoTramos()" style="width:130px;">
+    </div>
+
+    <div class="meta-bar">
+      <span class="meta-bar-icon">🎯</span>
+      <div class="meta-bar-label">
+        <span>Meta Objetivo</span>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <span style="font-size:0.62rem; color:#a8c4e8; text-transform:uppercase; letter-spacing:0.4px;">Tasa total a no superar</span>
+        <input type="number" id="meta-tasa" min="0" step="0.01" placeholder="ej: 63" oninput="recalcular()">
+      </div>
+    </div>
+
+    <button class="btn-pdf" onclick="window.print()">🖨️ Guardar PDF</button>
+    <button class="btn-reset" onclick="resetear()">Limpiar</button>
+  </div>
+
+  <!-- ── MAIN ─────────────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- LEFT: tabla de datos + resultados -->
+    <div class="left-col">
+
+      <div class="card">
+        <h2>Ingreso de Datos por Período</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:190px">Variable</th>
+              <th>Período 1</th>
+              <th>Período 2</th>
+              <th>Período 3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Masa (N° trabajadores)</td>
+              <td><input type="number" id="masa1" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="masa2" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="masa3" min="0" placeholder="0" oninput="recalcular()"></td>
+            </tr>
+            <tr>
+              <td>Días Perdidos</td>
+              <td><input type="number" id="dias1" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="dias2" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="dias3" min="0" placeholder="0" oninput="recalcular()"></td>
+            </tr>
+            <tr class="ts-it-row">
+              <td>Tasa Siniestralidad</td>
+              <td><input type="number" id="tasa1" readonly tabindex="-1"></td>
+              <td><input type="number" id="tasa2" readonly tabindex="-1"></td>
+              <td><input type="number" id="tasa3" readonly tabindex="-1"></td>
+            </tr>
+
+            <!-- ── SECCIÓN INVALIDECES Y MUERTES (colapsable) ── -->
+            <tr class="im-header" id="im-toggle-row" onclick="toggleIM()" style="cursor:pointer">
+              <td colspan="4">
+                <div class="im-toggle-btn">
+                  <span class="im-toggle-chevron" id="im-arrow">▼</span>
+                  <span class="im-toggle-title">Incapacidades Permanentes y Muertes — N° de casos por período</span>
+                  <span class="im-toggle-hint" id="im-hint">expandir</span>
+                </div>
+              </td>
+            </tr>
+            <tr class="im-valor im-collapsible" style="display:none">
+              <td>15% a 25% <span class="valor-badge">×0.25</span></td>
+              <td><input type="number" id="im11" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im12" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im13" min="0" placeholder="0" oninput="recalcular()"></td>
+            </tr>
+            <tr class="im-valor im-collapsible" style="display:none">
+              <td>27,5% a 37,5% <span class="valor-badge">×0.50</span></td>
+              <td><input type="number" id="im21" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im22" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im23" min="0" placeholder="0" oninput="recalcular()"></td>
+            </tr>
+            <tr class="im-valor im-collapsible" style="display:none">
+              <td>40% a 65% <span class="valor-badge">×1.00</span></td>
+              <td><input type="number" id="im31" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im32" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im33" min="0" placeholder="0" oninput="recalcular()"></td>
+            </tr>
+            <tr class="im-valor im-collapsible" style="display:none">
+              <td>70% o más <span class="valor-badge">×1.50</span></td>
+              <td><input type="number" id="im41" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im42" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im43" min="0" placeholder="0" oninput="recalcular()"></td>
+            </tr>
+            <tr class="im-valor im-collapsible" style="display:none">
+              <td>Gran Inválido <span class="valor-badge">×2.00</span></td>
+              <td><input type="number" id="im51" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im52" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im53" min="0" placeholder="0" oninput="recalcular()"></td>
+            </tr>
+            <tr class="im-valor im-collapsible" style="display:none">
+              <td>Muerte <span class="valor-badge">×2.50</span></td>
+              <td><input type="number" id="im61" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im62" min="0" placeholder="0" oninput="recalcular()"></td>
+              <td><input type="number" id="im63" min="0" placeholder="0" oninput="recalcular()"></td>
+            </tr>
+            <tr class="factor-im-row im-collapsible" style="display:none">
+              <td>Factor IM</td>
+              <td><input type="number" id="factor_im1" readonly tabindex="-1"></td>
+              <td><input type="number" id="factor_im2" readonly tabindex="-1"></td>
+              <td><input type="number" id="factor_im3" readonly tabindex="-1"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="formula-note">
+          <strong>TS IT</strong> = (Días/Masa)×100 por período → promedio entero &nbsp;·&nbsp;
+          <strong>Factor IM</strong> = (Σ valor×casos/Masa)×100 → promedio → tabla Tasa IM &nbsp;·&nbsp;
+          <strong>Tasa Total</strong> = TS IT (entero) + Tasa IM (tabla)
+        </div>
+        <label class="recargo-label">
+          <input type="checkbox" id="chk-recargo" onchange="recalcular()">
+          <span>⚠ Recargo por muerte (falta medidas preventivas) — sube un tramo (Art. 5° DS67)</span>
+        </label>
+        <div class="aviso-incompleto" id="aviso-incompleto">
+          ⚠ Faltan períodos — la Tasa Total se calcula sobre 3 períodos. Los períodos vacíos se consideran 0.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Resultados</h2>
+
+        <!-- Fila principal: 3 KPIs -->
+        <div class="results-grid">
+          <div class="result-box tasa-total">
+            <div class="result-label">Tasa Total Siniestralidad</div>
+            <div class="result-value" id="res-tasa-total">—</div>
+            <div class="result-sub" id="res-detalle-tasa">—</div>
+            <div class="result-sub" id="res-detalle-im" style="margin-top:2px">—</div>
+          </div>
+          <div class="result-box cotizacion" id="box-cotizacion">
+            <div class="result-label">Tasa Cotización Adicional</div>
+            <div class="result-value" id="res-cotizacion">—</div>
+            <div class="result-sub" id="res-tramo">—</div>
+          </div>
+          <div class="result-box colchon" id="box-colchon">
+            <div class="result-label">Días Colchón P3</div>
+            <div class="result-value" id="res-colchon">—</div>
+            <div class="result-sub" id="res-colchon-sub">ingresa la meta arriba</div>
+          </div>
+        </div>
+
+        <!-- Panel de detalle meta (visible solo con meta + datos) -->
+        <div class="insight-grid" id="insight-panel" style="display:none">
+
+          <!-- Stat: Meta -->
+          <div class="stat-card stat-meta">
+            <div class="stat-label">¿Cuál es la meta?</div>
+            <div class="stat-main"><span class="stat-val" id="ins-meta">—</span><span class="stat-unit">puntos de tasa</span></div>
+            <div class="stat-sub" id="ins-meta-desc">—</div>
+          </div>
+
+          <!-- Stat: Desglose IT + IM -->
+          <div class="stat-card stat-desglose">
+            <div class="stat-label">¿De qué se compone la tasa?</div>
+            <div class="stat-split" id="ins-desglose-bar">
+              <div class="split-it" id="split-it-bar" style="width:100%"><span id="split-it-lbl">IT</span></div>
+              <div class="split-im" id="split-im-bar" style="width:0%"><span id="split-im-lbl"></span></div>
+            </div>
+            <div class="stat-sub" id="ins-desglose-sub">—</div>
+          </div>
+
+          <!-- Stat: Días usados -->
+          <div class="stat-card stat-dias-usados">
+            <div class="stat-label">Total días perdidos (3 períodos)</div>
+            <div class="stat-main"><span class="stat-val" id="ins-dias-usados">—</span><span class="stat-unit">días en total</span></div>
+            <div class="stat-sub" id="ins-dias-usados-sub">—</div>
+          </div>
+
+          <!-- Stat: Días máx P3 + barra colchón -->
+          <div class="stat-card stat-colchon" id="stat-colchon-card">
+            <div class="stat-label">Días disponibles en Período 3</div>
+            <div class="colchon-nums">
+              <div style="font-size:0.6rem;color:#64748b;margin-bottom:2px">Usados &nbsp;<span style="color:#94a3b8">/ Máximo permitido</span></div>
+            </div>
+            <div class="colchon-nums">
+              <span class="colchon-usado" id="colchon-usado-num">—</span>
+              <span class="colchon-sep"> días /</span>
+              <span class="colchon-max" id="colchon-max-num">—</span>
+              <span class="colchon-sep"> días</span>
+            </div>
+            <div class="progress-bar-bg" style="margin-top:5px">
+              <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+              <div class="progress-bar-excess" id="progress-excess" style="width:0%"></div>
+            </div>
+            <div class="colchon-resto" id="progress-pct">—</div>
+          </div>
+
+        </div>
+
+        <!-- Conservar IDs legacy para compatibilidad con JS antiguo -->
+        <span id="prog-label-izq" style="display:none"></span>
+        <span id="prog-label-der" style="display:none"></span>
+        <div id="progress-wrap" style="display:none"></div>
+        <span id="ins-dias-max" style="display:none"></span>
+        <span id="ins-dias-max-sub" style="display:none"></span>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT: tabla de tramos -->
+    <div class="right-col">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <h2 style="margin-bottom:0">Tabla de Tramos — Cotización Adicional DS67</h2>
+          <button id="btn-toggle-costo" onclick="toggleCostoCol()"
+            style="font-size:0.62rem; padding:3px 8px; border:1px solid #b0c0d8; border-radius:4px;
+                   background:#eef2f9; color:#1A3A6B; cursor:pointer; white-space:nowrap;">
+            💰 Ocultar costos $
+          </button>
+        </div>
+        <div class="tramos-scroll-wrap">
+        <table class="tabla-tramos">
+          <thead>
+            <tr>
+              <th>Tramo Siniestralidad</th>
+              <th>Adicional DS67</th>
+              <th title="Cotización básica 0,93% + Adicional DS67">Total a pagar</th>
+              <th id="th-costo" title="Costo mensual estimado según cotización base ingresada">Costo mensual</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-tramos-body">
+            <tr data-min="0"   data-max="33"    data-total="0.93"> <td>0 — 32</td>    <td>0,00%</td> <td class="td-total">0,93%</td> <td class="td-costo" id="costo-0">—</td> <td id="estado-0">—</td></tr>
+            <tr data-min="33"  data-max="65"    data-total="1.27"> <td>33 — 64</td>   <td>0,34%</td> <td class="td-total">1,27%</td> <td class="td-costo" id="costo-1">—</td> <td id="estado-1">—</td></tr>
+            <tr data-min="65"  data-max="97"    data-total="1.61"> <td>65 — 96</td>   <td>0,68%</td> <td class="td-total">1,61%</td> <td class="td-costo" id="costo-2">—</td> <td id="estado-2">—</td></tr>
+            <tr data-min="97"  data-max="129"   data-total="1.95"> <td>97 — 128</td>  <td>1,02%</td> <td class="td-total">1,95%</td> <td class="td-costo" id="costo-3">—</td> <td id="estado-3">—</td></tr>
+            <tr data-min="129" data-max="161"   data-total="2.29"> <td>129 — 160</td> <td>1,36%</td> <td class="td-total">2,29%</td> <td class="td-costo" id="costo-4">—</td> <td id="estado-4">—</td></tr>
+            <tr class="tramo-extra" data-min="161" data-max="193"  data-total="2.63"> <td>161 — 192</td> <td>1,70%</td> <td class="td-total">2,63%</td> <td class="td-costo" id="costo-5">—</td>  <td id="estado-5">—</td></tr>
+            <tr class="tramo-extra" data-min="193" data-max="225"  data-total="2.97"> <td>193 — 224</td> <td>2,04%</td> <td class="td-total">2,97%</td> <td class="td-costo" id="costo-6">—</td>  <td id="estado-6">—</td></tr>
+            <tr class="tramo-extra" data-min="225" data-max="273"  data-total="3.31"> <td>225 — 272</td> <td>2,38%</td> <td class="td-total">3,31%</td> <td class="td-costo" id="costo-7">—</td>  <td id="estado-7">—</td></tr>
+            <tr class="tramo-extra" data-min="273" data-max="321"  data-total="3.65"> <td>273 — 320</td> <td>2,72%</td> <td class="td-total">3,65%</td> <td class="td-costo" id="costo-8">—</td>  <td id="estado-8">—</td></tr>
+            <tr class="tramo-extra" data-min="321" data-max="369"  data-total="3.99"> <td>321 — 368</td> <td>3,06%</td> <td class="td-total">3,99%</td> <td class="td-costo" id="costo-9">—</td>  <td id="estado-9">—</td></tr>
+            <tr class="tramo-extra" data-min="369" data-max="417"  data-total="4.33"> <td>369 — 416</td> <td>3,40%</td> <td class="td-total">4,33%</td> <td class="td-costo" id="costo-10">—</td> <td id="estado-10">—</td></tr>
+            <tr class="tramo-extra" data-min="417" data-max="465"  data-total="4.67"> <td>417 — 464</td> <td>3,74%</td> <td class="td-total">4,67%</td> <td class="td-costo" id="costo-11">—</td> <td id="estado-11">—</td></tr>
+            <tr class="tramo-extra" data-min="465" data-max="513"  data-total="5.01"> <td>465 — 512</td> <td>4,08%</td> <td class="td-total">5,01%</td> <td class="td-costo" id="costo-12">—</td> <td id="estado-12">—</td></tr>
+            <tr class="tramo-extra" data-min="513" data-max="561"  data-total="5.35"> <td>513 — 560</td> <td>4,42%</td> <td class="td-total">5,35%</td> <td class="td-costo" id="costo-13">—</td> <td id="estado-13">—</td></tr>
+            <tr class="tramo-extra" data-min="561" data-max="631"  data-total="5.69"> <td>561 — 630</td> <td>4,76%</td> <td class="td-total">5,69%</td> <td class="td-costo" id="costo-14">—</td> <td id="estado-14">—</td></tr>
+            <tr class="tramo-extra" data-min="631" data-max="701"  data-total="6.03"> <td>631 — 700</td> <td>5,10%</td> <td class="td-total">6,03%</td> <td class="td-costo" id="costo-15">—</td> <td id="estado-15">—</td></tr>
+            <tr class="tramo-extra" data-min="701" data-max="771"  data-total="6.37"> <td>701 — 770</td> <td>5,44%</td> <td class="td-total">6,37%</td> <td class="td-costo" id="costo-16">—</td> <td id="estado-16">—</td></tr>
+            <tr class="tramo-extra" data-min="771" data-max="841"  data-total="6.71"> <td>771 — 840</td> <td>5,78%</td> <td class="td-total">6,71%</td> <td class="td-costo" id="costo-17">—</td> <td id="estado-17">—</td></tr>
+            <tr class="tramo-extra" data-min="841" data-max="911"  data-total="7.05"> <td>841 — 910</td> <td>6,12%</td> <td class="td-total">7,05%</td> <td class="td-costo" id="costo-18">—</td> <td id="estado-18">—</td></tr>
+            <tr class="tramo-extra" data-min="911" data-max="981"  data-total="7.39"> <td>911 — 980</td> <td>6,46%</td> <td class="td-total">7,39%</td> <td class="td-costo" id="costo-19">—</td> <td id="estado-19">—</td></tr>
+            <tr class="tramo-extra" data-min="981" data-max="999999" data-total="7.73"><td>981 o más</td> <td>6,80%</td> <td class="td-total">7,73%</td> <td class="td-costo" id="costo-20">—</td> <td id="estado-20">—</td></tr>
+          </tbody>
+        </table>
+        </div><!-- /tramos-scroll-wrap -->
+        <button class="btn-toggle-tramos" id="btn-tramos" onclick="toggleTramos()">
+          ▼ Ver todos los tramos (16 más)
+        </button>
+      </div>
+
+      <!-- Gráfico de días -->
+      <div class="card chart-card">
+        <h2>Uso de Días — Total Períodos</h2>
+        <div class="chart-inner">
+          <canvas id="grafico-dona" width="130" height="130"></canvas>
+          <div class="chart-legend" id="chart-legend">
+            <div class="legend-item" id="legend-gastados">
+              <span class="legend-dot" style="background:#E8501C"></span>
+              <span class="legend-text">Días gastados: <strong id="leg-gastados">—</strong></span>
+            </div>
+            <div class="legend-item" id="legend-restantes">
+              <span class="legend-dot" style="background:#1A3A6B"></span>
+              <span class="legend-text">Días restantes: <strong id="leg-restantes">—</strong></span>
+            </div>
+            <div class="legend-item" id="legend-exceso" style="display:none">
+              <span class="legend-dot" style="background:#ef4444"></span>
+              <span class="legend-text">Exceso: <strong id="leg-exceso">—</strong></span>
+            </div>
+            <div class="legend-pct" id="legend-pct">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /page -->
+
+<script>
+  // ── FIX POWER BI: evitar que el visual capture el teclado ─
+  ['keydown','keyup','keypress'].forEach(function(evt) {
+    document.addEventListener(evt, function(e) { e.stopPropagation(); }, true);
+  });
+
+  // ── TOGGLE: Incapacidades y Muertes ──────────────────────
+  let imAbierto = false;
+  function toggleIM() {
+    imAbierto = !imAbierto;
+    document.querySelectorAll('.im-collapsible').forEach(r => {
+      r.style.display = imAbierto ? 'table-row' : 'none';
+    });
+    const row  = document.getElementById('im-toggle-row');
+    const hint = document.getElementById('im-hint');
+    row.classList.toggle('abierto', imAbierto);
+    if (hint) hint.textContent = imAbierto ? 'cerrar' : 'expandir';
+  }
+
+  // ── TOGGLE: Tramos extra ─────────────────────────────────
+  let costosVisibles = true;
+  function toggleCostoCol() {
+    costosVisibles = !costosVisibles;
+    // Mostrar/ocultar th y todas las celdas td-costo
+    document.querySelectorAll('.td-costo, #th-costo').forEach(el => {
+      el.style.display = costosVisibles ? '' : 'none';
+    });
+    // Mostrar/ocultar el input de cotización base en el header
+    const barCotiz = document.getElementById('meta-bar-cotiz');
+    if (barCotiz) barCotiz.style.display = costosVisibles ? '' : 'none';
+    // Actualizar texto del botón
+    document.getElementById('btn-toggle-costo').textContent =
+      costosVisibles ? '💰 Ocultar costos $' : '💰 Mostrar costos $';
+  }
+
+  let tramosAbierto = false;
+  function toggleTramos() {
+    tramosAbierto = !tramosAbierto;
+    document.querySelectorAll('.tramo-extra').forEach(r => {
+      r.style.display = tramosAbierto ? 'table-row' : 'none';
+    });
+    const btn = document.getElementById('btn-tramos');
+    btn.textContent = tramosAbierto
+      ? '▲ Mostrar menos'
+      : '▼ Ver todos los tramos (16 más)';
+    // Si hay un tramo activo oculto, abrir automáticamente
+  }
+
+  // Abre tramos automáticamente si el tramo activo está oculto
+  function asegurarTramoVisible() {
+    const activo = document.querySelector('#tabla-tramos-body tr.active-tramo');
+    if (activo && activo.classList.contains('tramo-extra') && !tramosAbierto) {
+      toggleTramos();
+    }
+  }
+
+  // ── TABLA LOOKUP: Promedio Factor IM → Tasa IM (Art. 2° j, DS67) ──
+  // Fuente: tabla literal del decreto, vigente desde 1-jul-2023
+  const TS_IM_LOOKUP = [
+    { min: 0.00, max: 0.11,   tasa: 0   },
+    { min: 0.11, max: 0.31,   tasa: 35  },
+    { min: 0.31, max: 0.51,   tasa: 70  },
+    { min: 0.51, max: 0.71,   tasa: 105 },
+    { min: 0.71, max: 0.91,   tasa: 140 },
+    { min: 0.91, max: 1.21,   tasa: 175 },
+    { min: 1.21, max: 1.51,   tasa: 210 },
+    { min: 1.51, max: 1.81,   tasa: 245 },
+    { min: 1.81, max: 2.11,   tasa: 280 },
+    { min: 2.11, max: 2.41,   tasa: 315 },
+    { min: 2.41, max: 2.71,   tasa: 350 },
+    { min: 2.71, max: 999999, tasa: 385 },
+  ];
+
+  function getTasaIM(promedioFactor) {
+    const tramo = TS_IM_LOOKUP.find(t => promedioFactor >= t.min && promedioFactor < t.max);
+    return tramo ? tramo.tasa : 0;
+  }
+
+  const TRAMOS = [
+    { min: 0,   max: 33,     tasa: 0,    label: '0 — 32'    },
+    { min: 33,  max: 65,     tasa: 0.34, label: '33 — 64'   },
+    { min: 65,  max: 97,     tasa: 0.68, label: '65 — 96'   },
+    { min: 97,  max: 129,    tasa: 1.02, label: '97 — 128'  },
+    { min: 129, max: 161,    tasa: 1.36, label: '129 — 160' },
+    { min: 161, max: 193,    tasa: 1.70, label: '161 — 192' },
+    { min: 193, max: 225,    tasa: 2.04, label: '193 — 224' },
+    { min: 225, max: 273,    tasa: 2.38, label: '225 — 272' },
+    { min: 273, max: 321,    tasa: 2.72, label: '273 — 320' },
+    { min: 321, max: 369,    tasa: 3.06, label: '321 — 368' },
+    { min: 369, max: 417,    tasa: 3.40, label: '369 — 416' },
+    { min: 417, max: 465,    tasa: 3.74, label: '417 — 464' },
+    { min: 465, max: 513,    tasa: 4.08, label: '465 — 512' },
+    { min: 513, max: 561,    tasa: 4.42, label: '513 — 560' },
+    { min: 561, max: 631,    tasa: 4.76, label: '561 — 630' },
+    { min: 631, max: 701,    tasa: 5.10, label: '631 — 700' },
+    { min: 701, max: 771,    tasa: 5.44, label: '701 — 770' },
+    { min: 771, max: 841,    tasa: 5.78, label: '771 — 840' },
+    { min: 841, max: 911,    tasa: 6.12, label: '841 — 910' },
+    { min: 911, max: 981,    tasa: 6.46, label: '911 — 980' },
+    { min: 981, max: 999999, tasa: 6.80, label: '981 o más' },
+  ];
+
+  // Pesos de cada categoría de incapacidad permanente
+  const IM_PESOS = [0.25, 0.50, 1.00, 1.50, 2.00, 2.50];
+
+  function val(id) {
+    const v = parseFloat(document.getElementById(id).value);
+    return isNaN(v) ? null : v;
+  }
+
+  // Factor IM período i = (Σ peso×casos / Masa) × 100
+  function getFactorIM(i) {
+    const masa = val('masa' + i);
+    const el   = document.getElementById('factor_im' + i);
+    if (!masa || masa === 0) { el.value = ''; return null; }
+
+    let suma = 0;
+    let tieneCasos = false;
+    IM_PESOS.forEach((peso, cat) => {
+      const casos = val(`im${cat + 1}${i}`) ?? 0;
+      if (casos > 0) tieneCasos = true;
+      suma += peso * casos;
+    });
+
+    if (!tieneCasos) { el.value = ''; return null; }
+    const factor = (suma / masa) * 100;
+    el.value = factor.toFixed(4);
+    return factor;
+  }
+
+  function getTasaperiodo(i) {
+    const dias  = val('dias' + i);
+    const masa  = val('masa' + i);
+    const el    = document.getElementById('tasa' + i);
+    if (dias !== null && masa !== null && masa > 0) {
+      const calc = (dias / masa) * 100;
+      el.value = calc.toFixed(4);
+      return calc;
+    }
+    el.value = '';
+    return null;
+  }
+
+  function getTramo(tasaTotal) {
+    return TRAMOS.find(t => tasaTotal >= t.min && tasaTotal < t.max) || TRAMOS[TRAMOS.length - 1];
+  }
+
+  function validarMeta() {
+    const input = document.getElementById('meta-tasa');
+    const v = parseFloat(input.value);
+    if (input.value !== '' && (isNaN(v) || v < 0)) {
+      input.classList.add('invalida');
+    } else {
+      input.classList.remove('invalida');
+    }
+  }
+
+  function actualizarCostoTramos() {
+    const base = parseFloat(document.getElementById('cotiz-base').value);
+    const filas = document.querySelectorAll('#tabla-tramos-body tr');
+    filas.forEach((tr, i) => {
+      const celda = document.getElementById(`costo-${i}`);
+      if (!celda) return;
+      if (isNaN(base) || base <= 0) {
+        celda.textContent = '—';
+        celda.className = 'td-costo';
+        return;
+      }
+      // Base imponible = cotización_base / 0,93%
+      const baseImponible = base / 0.0093;
+      const tasaTotal = parseFloat(tr.dataset.total) / 100;
+      const costo = Math.round(baseImponible * tasaTotal);
+      const diff  = costo - Math.round(base);
+      celda.textContent = '$' + costo.toLocaleString('es-CL') +
+        (i > 0 ? '  (+$' + (costo - Math.round(base)).toLocaleString('es-CL') + ')' : '');
+      celda.className = 'td-costo' + (i >= 5 ? ' costo-alto' : '');
+    });
+  }
+
+  function recalcular() {
+    validarMeta();
+
+    const t1 = getTasaperiodo(1);
+    const t2 = getTasaperiodo(2);
+    const t3 = getTasaperiodo(3);
+
+    const im1 = getFactorIM(1);
+    const im2 = getFactorIM(2);
+    const im3 = getFactorIM(3);
+
+    const validasIT = [t1, t2, t3].filter(v => v !== null);
+    const aviso     = document.getElementById('aviso-incompleto');
+
+    if (validasIT.length === 0) {
+      document.getElementById('res-tasa-total').textContent = '—';
+      document.getElementById('res-cotizacion').textContent = '—';
+      document.getElementById('res-detalle-tasa').textContent = '—';
+      document.getElementById('res-detalle-im').textContent = '—';
+      document.getElementById('res-tramo').textContent = '—';
+      aviso.style.display = 'none';
+      limpiarTramos();
+      actualizarColchon(null, null, null);
+      return;
+    }
+
+    aviso.style.display = validasIT.length < 3 ? 'block' : 'none';
+
+    // ── TASA IT (Art. 2° h e i) ──────────────────────────────────
+    // Por período: (días/masa)×100 con 2 decimales
+    // Promedio: ÷3 siempre, luego redondear al ENTERO más próximo
+    // (si primer decimal ≥ 5 → entero superior, de lo contrario → inferior)
+    const tsITcrudo = ((t1 ?? 0) + (t2 ?? 0) + (t3 ?? 0)) / 3;
+    const tsIT = Math.round(tsITcrudo); // entero, redondeo estándar
+
+    // ── FACTOR IM PROMEDIO y TASA IM (Art. 2° j) ─────────────────
+    // Promedio de los 3 factores ÷3 (vacíos = 0), con 2 decimales
+    // Luego lookup en tabla para obtener Tasa IM
+    const promedioFactorIM = ((im1 ?? 0) + (im2 ?? 0) + (im3 ?? 0)) / 3;
+    const tasaIM = getTasaIM(promedioFactorIM);
+
+    // ── TASA TOTAL (Art. 2° k) ────────────────────────────────────
+    // Tasa Total = Tasa IT (entero) + Tasa IM (de tabla)
+    const tasaTotal = tsIT + tasaIM;
+
+    // ── RECARGO POR MUERTE (Art. 5° inc. 2°) ─────────────────────
+    const recargo = document.getElementById('chk-recargo')?.checked ?? false;
+
+    // Determinar tramo base y aplicar recargo si corresponde
+    let tramoIdx = TRAMOS.findIndex(t => tasaTotal >= t.min && tasaTotal < t.max);
+    if (tramoIdx < 0) tramoIdx = TRAMOS.length - 1;
+    const tramoFinal = recargo
+      ? TRAMOS[Math.min(tramoIdx + 1, TRAMOS.length - 1)]
+      : TRAMOS[tramoIdx];
+
+    // ── MOSTRAR RESULTADOS ────────────────────────────────────────
+    document.getElementById('res-tasa-total').textContent = tasaTotal.toLocaleString('es-CL');
+
+    const fmt2 = v => v.toFixed(2).replace('.', ',');
+    const detallesIT = [t1, t2, t3].map((v, i) => `P${i+1}: ${fmt2(v ?? 0)}`).join(' · ');
+    // Texto IT
+    document.getElementById('res-detalle-tasa').textContent =
+      `Licencias: P1 ${fmt2(t1??0)} · P2 ${fmt2(t2??0)} · P3 ${fmt2(t3??0)} → promedio ${fmt2(tsITcrudo)} → Tasa IT: ${tsIT}`;
+
+    const hayCasosIM = (im1 ?? 0) + (im2 ?? 0) + (im3 ?? 0) > 0;
+    if (hayCasosIM) {
+      document.getElementById('res-detalle-im').textContent =
+        `Invalideces/Muertes: factor promedio ${fmt2(promedioFactorIM)} → Tasa IM: ${tasaIM}`;
+    } else {
+      document.getElementById('res-detalle-im').textContent =
+        'Sin invalideces ni muertes → Tasa IM: 0';
+    }
+
+    document.getElementById('res-cotizacion').textContent =
+      tramoFinal.tasa.toFixed(2).replace('.', ',') + '%';
+    document.getElementById('res-tramo').textContent =
+      'Tramo: ' + tramoFinal.label + (recargo ? ' ⚠ +1 recargo' : '');
+
+    const box = document.getElementById('box-cotizacion');
+    box.className = 'result-box cotizacion';
+    if (tramoFinal.tasa >= 1.0) box.classList.add('danger');
+    else if (tramoFinal.tasa > 0) box.classList.add('warning');
+
+    actualizarTablaTramos(tasaTotal);
+    // El colchón usa la Tasa IM (valor de tabla, fijo)
+    actualizarColchon(t1, t2, t3, tasaIM);
+  }
+
+  function ocultarInsights() {
+    document.getElementById('insight-panel').style.display = 'none';
+  }
+
+  function actualizarColchon(t1, t2, t3, tsIM = 0) {
+    const meta   = val('meta-tasa');
+    const masa3  = val('masa3');
+    const dias3  = val('dias3');
+    const box    = document.getElementById('box-colchon');
+    const resVal = document.getElementById('res-colchon');
+    const resSub = document.getElementById('res-colchon-sub');
+
+    if (meta === null) {
+      resVal.textContent = '—';
+      resSub.textContent = 'ingresa la meta arriba';
+      box.className = 'result-box colchon';
+      ocultarInsights();
+      dibujarGrafico(dias3, null);
+      return;
+    }
+    if (t1 === null || t2 === null) {
+      resVal.textContent = '—';
+      resSub.textContent = 'faltan datos de P1 o P2';
+      box.className = 'result-box colchon';
+      ocultarInsights();
+      dibujarGrafico(dias3, null);
+      return;
+    }
+    if (masa3 === null || masa3 === 0) {
+      resVal.textContent = '—';
+      resSub.textContent = 'ingresa la Masa del P3';
+      box.className = 'result-box colchon';
+      ocultarInsights();
+      dibujarGrafico(dias3, null);
+      return;
+    }
+
+    // ── Cálculo base ─────────────────────────────────────────────
+    const metaIT     = meta - tsIM;
+    // El promedio se redondea, así que el límite real es cuando el promedio
+    // llega justo a meta+0.4999 (que aún redondea a meta, no a meta+1)
+    const t3Max      = (metaIT + 0.4999) * 3 - t1 - t2;
+    const diasMax    = (t3Max / 100) * masa3;
+    const diasActual = dias3 ?? 0;
+    const colchon    = diasMax - diasActual;
+
+    const dias1v = val('dias1') ?? 0;
+    const dias2v = val('dias2') ?? 0;
+    const masa1v = val('masa1') ?? 0;
+    const masa2v = val('masa2') ?? 0;
+
+    const diasUsadosP1P2  = dias1v + dias2v;
+    const totalDiasUsados = diasUsadosP1P2 + diasActual;
+    const totalMax = Math.floor((t1 / 100) * masa1v) + Math.floor((t2 / 100) * masa2v) + Math.floor(Math.max(0, diasMax));
+
+    // ── Caja colchón ─────────────────────────────────────────────
+    if (t3Max < 0) {
+      resVal.textContent = '¡Superada!';
+      resSub.textContent = 'P1+P2 ya superan la meta';
+      box.className = 'result-box colchon exceeded';
+      ocultarInsights();
+      dibujarGrafico(totalDiasUsados, totalDiasUsados);
+      return;
+    }
+
+    resVal.textContent = Math.floor(colchon).toLocaleString('es-CL');
+    if (colchon < 0) {
+      resSub.textContent = `Meta ya superada (máx: ${Math.floor(diasMax)})`;
+      box.className = 'result-box colchon exceeded';
+    } else if (colchon < diasMax * 0.15) {
+      resSub.textContent = `días restantes · máx P3: ${Math.floor(diasMax)}`;
+      box.className = 'result-box colchon tight';
+    } else {
+      resSub.textContent = `días restantes · máx P3: ${Math.floor(diasMax)}`;
+      box.className = 'result-box colchon ok';
+    }
+
+    // ── Panel de insights ─────────────────────────────────────────
+    document.getElementById('insight-panel').style.display = 'grid';
+
+    // — Meta
+    const metaTramo = TRAMOS.find(t => meta >= t.min && meta < t.max) || TRAMOS[TRAMOS.length-1];
+    document.getElementById('ins-meta').textContent = meta.toLocaleString('es-CL');
+    document.getElementById('ins-meta-desc').textContent =
+      `Si la tasa total no supera ${meta}, la cotización adicional es ${metaTramo.tasa.toFixed(2).replace('.',',')}%`;
+
+    // — Desglose IT/IM split bar
+    const totalTasa = metaIT + tsIM;
+    const pctIT = totalTasa > 0 ? (metaIT / totalTasa) * 100 : 100;
+    const pctIM = totalTasa > 0 ? (tsIM  / totalTasa) * 100 : 0;
+    const splitIT = document.getElementById('split-it-bar');
+    const splitIM = document.getElementById('split-im-bar');
+    splitIT.style.width = pctIT + '%';
+    splitIM.style.width = pctIM + '%';
+    document.getElementById('split-it-lbl').textContent = metaIT > 0 ? `Accidentes ${metaIT}` : '';
+    document.getElementById('split-im-lbl').textContent = tsIM   > 0 ? `Inv./Muertes ${tsIM}` : '';
+    const imTexto = tsIM > 0
+      ? `Incapacidades/Muertes aportan ${tsIM} puntos`
+      : `Sin casos de invalidez ni muertes`;
+    document.getElementById('ins-desglose-sub').textContent =
+      `Accidentes: ${metaIT} pts  +  Inv./Muertes: ${tsIM} pts  =  ${totalTasa} total  ·  ${imTexto}`;
+
+    // — Días usados
+    document.getElementById('ins-dias-usados').textContent =
+      totalDiasUsados.toLocaleString('es-CL');
+    document.getElementById('ins-dias-usados-sub').textContent =
+      `Período 1: ${dias1v.toLocaleString('es-CL')} días  ·  Período 2: ${dias2v.toLocaleString('es-CL')} días  ·  Período 3: ${diasActual.toLocaleString('es-CL')} días`;
+
+    // — Colchón P3: números + barra + estado
+    document.getElementById('colchon-usado-num').textContent = diasActual.toLocaleString('es-CL');
+    document.getElementById('colchon-max-num').textContent   = Math.floor(diasMax).toLocaleString('es-CL');
+
+    const pctUsado  = diasMax > 0 ? Math.min((diasActual / diasMax) * 100, 100) : 0;
+    const pctExceso = diasMax > 0 && diasActual > diasMax
+      ? Math.min(((diasActual - diasMax) / diasMax) * 100, 100) : 0;
+    document.getElementById('progress-fill').style.width   = pctUsado  + '%';
+    document.getElementById('progress-excess').style.width = pctExceso + '%';
+
+    const restoDias = Math.floor(colchon);
+    const pctLabel  = diasMax > 0 ? ((diasActual / diasMax) * 100).toFixed(1) + '%' : '';
+    document.getElementById('progress-pct').textContent = colchon >= 0
+      ? `✔ Aún quedan ${restoDias.toLocaleString('es-CL')} días disponibles (${pctLabel} del máximo usado)`
+      : `⚠ Se excedió el máximo en ${Math.abs(restoDias).toLocaleString('es-CL')} días`;
+
+    const colchonCard = document.getElementById('stat-colchon-card');
+    colchonCard.className = 'stat-card stat-colchon' +
+      (colchon < 0 ? ' exceeded' : (pctUsado > 75 ? ' tight' : ''));
+
+    dibujarGrafico(totalDiasUsados, totalMax);
+  }
+
+  function dibujarGrafico(diasGastados, diasMax) {
+    const canvas = document.getElementById('grafico-dona');
+    const ctx    = canvas.getContext('2d');
+    const cx = canvas.width  / 2;
+    const cy = canvas.height / 2;
+    const r  = 54;
+    const ri = 32;  // radio interior (dona)
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const legGastados  = document.getElementById('leg-gastados');
+    const legRestantes = document.getElementById('leg-restantes');
+    const legExceso    = document.getElementById('leg-exceso');
+    const itemExceso   = document.getElementById('legend-exceso');
+    const pct          = document.getElementById('legend-pct');
+
+    // Sin datos suficientes — círculo gris vacío
+    if (diasMax === null || diasMax <= 0) {
+      arc(ctx, cx, cy, r, ri, -Math.PI/2, Math.PI*2, '#e2e8f0');
+      legGastados.textContent  = '—';
+      legRestantes.textContent = '—';
+      itemExceso.style.display = 'none';
+      pct.textContent = '—';
+      return;
+    }
+
+    const gastados  = Math.max(0, Math.floor(diasGastados ?? 0));
+    const exceso    = Math.max(0, gastados - Math.floor(diasMax));
+    const gastadosOk = Math.min(gastados, diasMax);
+    const restantes  = Math.max(0, diasMax - gastados);
+    const total      = diasMax + exceso;
+    const pctUsado   = diasMax > 0 ? Math.min((gastados / diasMax) * 100, 999) : 0;
+
+    const startAngle = -Math.PI / 2;
+    let angle = startAngle;
+
+    if (gastadosOk > 0) {
+      const a = (gastadosOk / total) * Math.PI * 2;
+      arc(ctx, cx, cy, r, ri, angle, a, '#E8501C');
+      angle += a;
+    }
+
+    if (restantes > 0) {
+      const a = (restantes / total) * Math.PI * 2;
+      arc(ctx, cx, cy, r, ri, angle, a, '#1A3A6B');
+      angle += a;
+    }
+
+    if (exceso > 0) {
+      const a = (exceso / total) * Math.PI * 2;
+      arc(ctx, cx, cy, r, ri, angle, a, '#ef4444');
+    }
+
+    // Si no hay datos de días gastados aún, arco completo gris
+    if (gastados === 0 && restantes > 0) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      arc(ctx, cx, cy, r, ri, -Math.PI/2, Math.PI*2, '#22c55e');
+    }
+
+    legGastados.textContent  = gastadosOk.toLocaleString('es-CL');
+    legRestantes.textContent = restantes.toLocaleString('es-CL');
+
+    if (exceso > 0) {
+      itemExceso.style.display = 'flex';
+      legExceso.textContent = exceso.toLocaleString('es-CL');
+    } else {
+      itemExceso.style.display = 'none';
+    }
+
+    const pctColor = pctUsado >= 100 ? '#b91c1c' : pctUsado >= 85 ? '#c2410c' : '#15803d';
+    pct.style.color = pctColor;
+    pct.textContent = pctUsado.toFixed(1).replace('.', ',') + '% usado';
+  }
+
+  function arc(ctx, cx, cy, r, ri, startAngle, sweep, color) {
+    ctx.beginPath();
+    ctx.moveTo(cx + r * Math.cos(startAngle), cy + r * Math.sin(startAngle));
+    ctx.arc(cx, cy, r,  startAngle, startAngle + sweep);
+    ctx.arc(cx, cy, ri, startAngle + sweep, startAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    // separador
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function actualizarTablaTramos(tasaTotal) {
+    const rows = document.querySelectorAll('#tabla-tramos-body tr');
+    rows.forEach((row, i) => {
+      const min = parseFloat(row.dataset.min);
+      const max = parseFloat(row.dataset.max);
+      const estadoEl = document.getElementById('estado-' + i);
+      if (tasaTotal >= min && tasaTotal < max) {
+        row.classList.add('active-tramo');
+        estadoEl.textContent = '✔ Aplica';
+      } else {
+        row.classList.remove('active-tramo');
+        estadoEl.textContent = '';
+      }
+    });
+    asegurarTramoVisible();
+  }
+
+  function limpiarTramos() {
+    const rows = document.querySelectorAll('#tabla-tramos-body tr');
+    rows.forEach((row, i) => {
+      row.classList.remove('active-tramo');
+      document.getElementById('estado-' + i).textContent = '—';
+    });
+  }
+
+  function resetear() {
+    ['masa','dias'].forEach(campo => {
+      [1,2,3].forEach(i => { document.getElementById(campo + i).value = ''; });
+    });
+    [1,2,3].forEach(i => {
+      document.getElementById('tasa' + i).value = '';
+      document.getElementById('factor_im' + i).value = '';
+    });
+    for (let cat = 1; cat <= 6; cat++)
+      [1,2,3].forEach(p => { document.getElementById(`im${cat}${p}`).value = ''; });
+    document.getElementById('res-detalle-im').textContent = '—';
+    document.getElementById('meta-tasa').value = '';
+    document.getElementById('cotiz-base').value = '';
+    actualizarCostoTramos();
+    document.getElementById('res-tasa-total').textContent = '—';
+    document.getElementById('res-cotizacion').textContent = '—';
+    document.getElementById('res-detalle-tasa').textContent = '—';
+    document.getElementById('res-tramo').textContent = '—';
+    document.getElementById('res-colchon').textContent = '—';
+    document.getElementById('res-colchon-sub').textContent = 'ingresa la meta arriba';
+    document.getElementById('box-cotizacion').className = 'result-box cotizacion';
+    document.getElementById('box-colchon').className = 'result-box colchon';
+    document.getElementById('aviso-incompleto').style.display = 'none';
+    document.getElementById('meta-tasa').classList.remove('invalida');
+    const chkRecargo = document.getElementById('chk-recargo');
+    if (chkRecargo) chkRecargo.checked = false;
+    ocultarInsights();
+    limpiarTramos();
+    dibujarGrafico(null, null);
+  }
+
+  recalcular();
+</script>
+</body>
+</html>
