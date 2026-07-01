@@ -93,11 +93,11 @@
     .meta-bar input.invalida { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
 
     .btn-reset {
-      padding: 6px 14px; background: #E8501C; color: white;
-      border: none; border-radius: 6px; font-size: 0.75rem;
-      font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
+      padding: 6px 14px; background: transparent; color: #d0e4f7;
+      border: 1px solid rgba(255,255,255,0.35); border-radius: 6px; font-size: 0.72rem;
+      font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s; white-space: nowrap;
     }
-    .btn-reset:hover { background: #c94318; }
+    .btn-reset:hover { background: rgba(255,255,255,0.12); color: #fff; }
 
     /* ── MAIN ────────────────────────────────────────────── */
     .main {
@@ -116,7 +116,7 @@
       gap: 8px;
       min-height: 0;
     }
-    .left-col { overflow-y: auto; }
+    .left-col, .right-col { overflow-y: auto; }
 
     /* ── CARDS ───────────────────────────────────────────── */
     .card {
@@ -184,6 +184,15 @@
       border-radius: 0 3px 3px 0; margin-top: 7px;
     }
 
+    .periodo-info {
+      font-size: 0.68rem; color: #1A3A6B; background: #eef2f9;
+      border-left: 3px solid #1A3A6B; padding: 5px 8px;
+      border-radius: 0 3px 3px 0; margin-bottom: 8px; line-height: 1.4;
+    }
+    .periodo-info strong { color: #E8501C; }
+
+    .periodo-anio { font-size: 0.6rem; font-weight: 400; color: #a8c4e8; text-transform: none; letter-spacing: 0; }
+
     /* ── RESULT BOXES ────────────────────────────────────── */
     .results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
 
@@ -216,6 +225,8 @@
     .result-box.colchon .result-value  { color: #64748b; }
     .result-box.colchon.ok             { border-color: #bbf7d0; background: #f0fdf4; }
     .result-box.colchon.ok .result-value { color: #15803d; }
+    .result-box.colchon.warning        { border-color: #fde68a; background: #fffbeb; }
+    .result-box.colchon.warning .result-value { color: #b45309; }
     .result-box.colchon.tight          { border-color: #fed7aa; background: #fff7ed; }
     .result-box.colchon.tight .result-value { color: #c2410c; }
     .result-box.colchon.exceeded       { border-color: #fecaca; background: #fff5f5; }
@@ -281,6 +292,16 @@
     }
     .btn-toggle-tramos:hover { background: #dce6f5; }
 
+    /* ── BOTÓN TOGGLE FÓRMULAS ────────────────────────────── */
+    .btn-toggle-formula {
+      width: 100%; margin-top: 7px;
+      padding: 4px 0; font-size: 0.65rem; font-weight: 600;
+      color: #64748b; background: #f7f9fc;
+      border: 1px solid #dde3ec; border-radius: 5px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-toggle-formula:hover { background: #eef2f9; color: #1A3A6B; }
+
     /* ── BOTÓN TOGGLE IM ─────────────────────────────────── */
     .im-header td { transition: background 0.15s; }
     .im-header:hover td { background: #dce6f5 !important; }
@@ -309,7 +330,7 @@
     /* ── INSIGHT GRID ────────────────────────────────────── */
     .insight-grid {
       display: grid;
-      grid-template-columns: 1fr 1.4fr 1fr 1.2fr;
+      grid-template-columns: 1fr 1fr;
       gap: 6px;
       margin-top: 7px;
     }
@@ -365,6 +386,7 @@
 
     /* Colchón P3 con barra */
     .stat-colchon { border-left-color: #15803d; background: #f0fdf4; }
+    .stat-colchon.warning { border-left-color: #b45309; background: #fffbeb; }
     .stat-colchon.tight   { border-left-color: #c2410c; background: #fff7ed; }
     .stat-colchon.exceeded { border-left-color: #b91c1c; background: #fff5f5; }
 
@@ -378,6 +400,7 @@
       font-size: 0.6rem; font-weight: 600; color: #15803d;
       margin-top: 3px; text-align: right;
     }
+    .stat-colchon.warning .colchon-resto { color: #b45309; }
     .stat-colchon.tight .colchon-resto   { color: #c2410c; }
     .stat-colchon.exceeded .colchon-resto { color: #b91c1c; }
 
@@ -438,6 +461,58 @@
     .legend-text strong { color: #1e293b; }
 
     .legend-pct { font-size: 1.2rem; font-weight: 700; color: #1A3A6B; margin-top: 2px; }
+
+    /* ── RESUMEN ESCRITO ─────────────────────────────────── */
+    .resumen-texto {
+      font-size: 0.78rem; line-height: 1.55; color: #334155;
+    }
+    .resumen-texto strong { color: #1A3A6B; }
+
+    /* ── HERO CARD (KPI principal) ────────────────────────── */
+    .hero-card {
+      background: linear-gradient(135deg, #eef2f9 0%, #f7f9fc 100%);
+      border: 2px solid #b0c0d8;
+    }
+    .hero-card.ok       { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4 0%, #f7f9fc 100%); }
+    .hero-card.warning  { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb 0%, #f7f9fc 100%); }
+    .hero-card.tight    { border-color: #fdba74; background: linear-gradient(135deg, #fff7ed 0%, #f7f9fc 100%); }
+    .hero-card.exceeded { border-color: #fca5a5; background: linear-gradient(135deg, #fff5f5 0%, #f7f9fc 100%); }
+
+    .hero-main { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+
+    .hero-kpi { text-align: left; }
+    .hero-lead {
+      font-size: 0.85rem; font-weight: 700; color: #1A3A6B; margin-bottom: 1px;
+      min-height: 1.1em;
+    }
+    .hero-card.warning  .hero-lead { color: #b45309; }
+    .hero-card.tight    .hero-lead { color: #c2410c; }
+    .hero-card.exceeded .hero-lead { color: #b91c1c; }
+    .hero-value { font-size: 4.2rem; font-weight: 800; line-height: 0.95; color: #1A3A6B; }
+    .hero-card.ok       .hero-value { color: #15803d; }
+    .hero-card.warning  .hero-value { color: #b45309; }
+    .hero-card.tight    .hero-value { color: #c2410c; }
+    .hero-card.exceeded .hero-value { color: #b91c1c; }
+    .hero-label { font-size: 0.8rem; font-weight: 600; color: #64748b; letter-spacing: 0.2px; margin-top: 3px; max-width: 240px; }
+
+    .hero-secondary { display: flex; gap: 16px; flex-wrap: wrap; }
+    .hero-sec-item { text-align: center; }
+    .hero-sec-item span { display: block; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #94a3b8; }
+    .hero-sec-item strong { font-size: 0.95rem; color: #1A3A6B; }
+
+    .hero-bar-wrap { margin-top: 12px; }
+    .hero-bar-bg { height: 14px; border-radius: 7px; background: #e2e8f0; overflow: hidden; display: flex; }
+    /* Verde = días restantes · Rojo = días ya usados (se va "comiendo" el verde) */
+    .hero-bar-fill { height: 100%; background: #15803d; transition: width 0.3s ease; }
+    .hero-bar-excess { height: 100%; background: #b91c1c; transition: width 0.3s ease; }
+    .hero-bar-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: #64748b; margin-top: 3px; }
+
+    .hero-recomendacion {
+      margin-top: 10px; font-size: 0.75rem; line-height: 1.5; color: #334155;
+      background: rgba(255,255,255,0.6); border-left: 3px solid #1A3A6B;
+      border-radius: 0 5px 5px 0; padding: 7px 10px;
+    }
+    .hero-recomendacion strong { color: #1A3A6B; }
 
     /* ── BOTÓN PDF ───────────────────────────────────────── */
     .btn-pdf {
@@ -501,15 +576,47 @@
     <!-- LEFT: tabla de datos + resultados -->
     <div class="left-col">
 
+      <!-- HERO: KPI principal — margen de días disponibles -->
+      <div class="card hero-card" id="card-hero">
+        <div class="hero-main">
+          <div class="hero-kpi">
+            <div class="hero-lead" id="hero-lead"></div>
+            <div class="hero-value" id="hero-dias">—</div>
+            <div class="hero-label" id="hero-label">días disponibles</div>
+          </div>
+          <div class="hero-secondary">
+            <div class="hero-sec-item"><span>Tasa actual</span><strong id="hero-tasa">—</strong></div>
+            <div class="hero-sec-item"><span>Tramo</span><strong id="hero-tramo">—</strong></div>
+            <div class="hero-sec-item"><span>Cotización</span><strong id="hero-cotiz">—</strong></div>
+          </div>
+        </div>
+        <div class="hero-bar-wrap" id="hero-bar-section" style="display:none">
+          <div class="hero-bar-bg">
+            <div class="hero-bar-fill" id="hero-bar-fill" style="width:0%"></div>
+            <div class="hero-bar-excess" id="hero-bar-excess" style="width:0%"></div>
+          </div>
+          <div class="hero-bar-labels">
+            <span id="hero-bar-usado">0 días usados</span>
+            <span id="hero-bar-max">/ 0 máximo</span>
+          </div>
+        </div>
+        <div class="hero-recomendacion" id="hero-recomendacion">—</div>
+      </div>
+
       <div class="card">
         <h2>Ingreso de Datos por Período</h2>
+        <div class="periodo-info">
+          ℹ️ Cada período dura 12 meses: empieza el <strong>1 de julio</strong> y termina el <strong>30 de junio del año siguiente</strong>
+          (ejemplo: si empieza en julio de 2024, termina en junio de <strong>2025</strong>, no en 2024).
+          El Período 3 es el más reciente (actual) y el Período 1 el más antiguo.
+        </div>
         <table>
           <thead>
             <tr>
               <th style="width:190px">Variable</th>
-              <th>Período 1</th>
-              <th>Período 2</th>
-              <th>Período 3</th>
+              <th title="Período más antiguo de los 3">Período 1<br><span class="periodo-anio" id="anio-p1"></span></th>
+              <th title="Período intermedio">Período 2<br><span class="periodo-anio" id="anio-p2"></span></th>
+              <th title="Período más reciente (el actual)">Período 3<br><span class="periodo-anio" id="anio-p3"></span></th>
             </tr>
           </thead>
           <tbody>
@@ -526,7 +633,7 @@
               <td><input type="number" id="dias3" min="0" placeholder="0" oninput="recalcular()"></td>
             </tr>
             <tr class="ts-it-row">
-              <td>Tasa Siniestralidad</td>
+              <td>🔒 Tasa Siniestralidad <span style="font-weight:400; font-size:0.62rem; color:#94a3b8;">(calculado)</span></td>
               <td><input type="number" id="tasa1" readonly tabindex="-1"></td>
               <td><input type="number" id="tasa2" readonly tabindex="-1"></td>
               <td><input type="number" id="tasa3" readonly tabindex="-1"></td>
@@ -586,7 +693,10 @@
             </tr>
           </tbody>
         </table>
-        <div class="formula-note">
+        <button class="btn-toggle-formula" id="btn-formula" onclick="toggleFormula()">
+          ▼ Ver metodología / fórmulas
+        </button>
+        <div class="formula-note" id="formula-note" style="display:none">
           <strong>TS IT</strong> = (Días/Masa)×100 por período → promedio entero &nbsp;·&nbsp;
           <strong>Factor IM</strong> = (Σ valor×casos/Masa)×100 → promedio → tabla Tasa IM &nbsp;·&nbsp;
           <strong>Tasa Total</strong> = TS IT (entero) + Tasa IM (tabla)
@@ -600,89 +710,9 @@
         </div>
       </div>
 
-      <div class="card">
-        <h2>Resultados</h2>
-
-        <!-- Fila principal: 3 KPIs -->
-        <div class="results-grid">
-          <div class="result-box tasa-total">
-            <div class="result-label">Tasa Total Siniestralidad</div>
-            <div class="result-value" id="res-tasa-total">—</div>
-            <div class="result-sub" id="res-detalle-tasa">—</div>
-            <div class="result-sub" id="res-detalle-im" style="margin-top:2px">—</div>
-          </div>
-          <div class="result-box cotizacion" id="box-cotizacion">
-            <div class="result-label">Tasa Cotización Adicional</div>
-            <div class="result-value" id="res-cotizacion">—</div>
-            <div class="result-sub" id="res-tramo">—</div>
-          </div>
-          <div class="result-box colchon" id="box-colchon">
-            <div class="result-label">Días Colchón P3</div>
-            <div class="result-value" id="res-colchon">—</div>
-            <div class="result-sub" id="res-colchon-sub">ingresa la meta arriba</div>
-          </div>
-        </div>
-
-        <!-- Panel de detalle meta (visible solo con meta + datos) -->
-        <div class="insight-grid" id="insight-panel" style="display:none">
-
-          <!-- Stat: Meta -->
-          <div class="stat-card stat-meta">
-            <div class="stat-label">¿Cuál es la meta?</div>
-            <div class="stat-main"><span class="stat-val" id="ins-meta">—</span><span class="stat-unit">puntos de tasa</span></div>
-            <div class="stat-sub" id="ins-meta-desc">—</div>
-          </div>
-
-          <!-- Stat: Desglose IT + IM -->
-          <div class="stat-card stat-desglose">
-            <div class="stat-label">¿De qué se compone la tasa?</div>
-            <div class="stat-split" id="ins-desglose-bar">
-              <div class="split-it" id="split-it-bar" style="width:100%"><span id="split-it-lbl">IT</span></div>
-              <div class="split-im" id="split-im-bar" style="width:0%"><span id="split-im-lbl"></span></div>
-            </div>
-            <div class="stat-sub" id="ins-desglose-sub">—</div>
-          </div>
-
-          <!-- Stat: Días usados -->
-          <div class="stat-card stat-dias-usados">
-            <div class="stat-label">Total días perdidos (3 períodos)</div>
-            <div class="stat-main"><span class="stat-val" id="ins-dias-usados">—</span><span class="stat-unit">días en total</span></div>
-            <div class="stat-sub" id="ins-dias-usados-sub">—</div>
-          </div>
-
-          <!-- Stat: Días máx P3 + barra colchón -->
-          <div class="stat-card stat-colchon" id="stat-colchon-card">
-            <div class="stat-label">Días disponibles en Período 3</div>
-            <div class="colchon-nums">
-              <div style="font-size:0.6rem;color:#64748b;margin-bottom:2px">Usados &nbsp;<span style="color:#94a3b8">/ Máximo permitido</span></div>
-            </div>
-            <div class="colchon-nums">
-              <span class="colchon-usado" id="colchon-usado-num">—</span>
-              <span class="colchon-sep"> días /</span>
-              <span class="colchon-max" id="colchon-max-num">—</span>
-              <span class="colchon-sep"> días</span>
-            </div>
-            <div class="progress-bar-bg" style="margin-top:5px">
-              <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-              <div class="progress-bar-excess" id="progress-excess" style="width:0%"></div>
-            </div>
-            <div class="colchon-resto" id="progress-pct">—</div>
-          </div>
-
-        </div>
-
-        <!-- Conservar IDs legacy para compatibilidad con JS antiguo -->
-        <span id="prog-label-izq" style="display:none"></span>
-        <span id="prog-label-der" style="display:none"></span>
-        <div id="progress-wrap" style="display:none"></div>
-        <span id="ins-dias-max" style="display:none"></span>
-        <span id="ins-dias-max-sub" style="display:none"></span>
-
-      </div>
-
     </div>
 
-    <!-- RIGHT: tabla de tramos -->
+    <!-- RIGHT: tabla de tramos + detalle -->
     <div class="right-col">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -734,28 +764,89 @@
         </button>
       </div>
 
-      <!-- Gráfico de días -->
-      <div class="card chart-card">
-        <h2>Uso de Días — Total Períodos</h2>
-        <div class="chart-inner">
-          <canvas id="grafico-dona" width="130" height="130"></canvas>
-          <div class="chart-legend" id="chart-legend">
-            <div class="legend-item" id="legend-gastados">
-              <span class="legend-dot" style="background:#E8501C"></span>
-              <span class="legend-text">Días gastados: <strong id="leg-gastados">—</strong></span>
-            </div>
-            <div class="legend-item" id="legend-restantes">
-              <span class="legend-dot" style="background:#1A3A6B"></span>
-              <span class="legend-text">Días restantes: <strong id="leg-restantes">—</strong></span>
-            </div>
-            <div class="legend-item" id="legend-exceso" style="display:none">
-              <span class="legend-dot" style="background:#ef4444"></span>
-              <span class="legend-text">Exceso: <strong id="leg-exceso">—</strong></span>
-            </div>
-            <div class="legend-pct" id="legend-pct">—</div>
+      <div class="card">
+        <h2>Resultados</h2>
+
+        <!-- Fila principal: 3 KPIs -->
+        <div class="results-grid">
+          <div class="result-box tasa-total">
+            <div class="result-label">Tasa Total Siniestralidad</div>
+            <div class="result-value" id="res-tasa-total">—</div>
+            <div class="result-sub" id="res-detalle-tasa">—</div>
+            <div class="result-sub" id="res-detalle-im" style="margin-top:2px">—</div>
+          </div>
+          <div class="result-box cotizacion" id="box-cotizacion">
+            <div class="result-label">Tasa Cotización Adicional</div>
+            <div class="result-value" id="res-cotizacion">—</div>
+            <div class="result-sub" id="res-tramo">—</div>
+          </div>
+          <div class="result-box colchon" id="box-colchon">
+            <div class="result-label">Margen Restante</div>
+            <div class="result-value" id="res-colchon">—</div>
+            <div class="result-sub" id="res-colchon-sub">ingresa la meta arriba</div>
           </div>
         </div>
+
+        <!-- Panel de detalle meta (visible solo con meta + datos) -->
+        <button class="btn-toggle-formula" id="btn-detalle" onclick="toggleDetalle()" style="display:none; margin-top:8px;">
+          ▼ Ver detalle del cálculo
+        </button>
+        <div class="insight-grid" id="insight-panel" style="display:none">
+
+          <!-- Stat: Meta -->
+          <div class="stat-card stat-meta">
+            <div class="stat-label">¿Cuál es la meta?</div>
+            <div class="stat-main"><span class="stat-val" id="ins-meta">—</span><span class="stat-unit">puntos de tasa</span></div>
+            <div class="stat-sub" id="ins-meta-desc">—</div>
+          </div>
+
+          <!-- Stat: Desglose IT + IM -->
+          <div class="stat-card stat-desglose">
+            <div class="stat-label">¿De qué se compone la tasa?</div>
+            <div class="stat-split" id="ins-desglose-bar">
+              <div class="split-it" id="split-it-bar" style="width:100%"><span id="split-it-lbl">IT</span></div>
+              <div class="split-im" id="split-im-bar" style="width:0%"><span id="split-im-lbl"></span></div>
+            </div>
+            <div class="stat-sub" id="ins-desglose-sub">—</div>
+          </div>
+
+          <!-- Stat: Días usados -->
+          <div class="stat-card stat-dias-usados">
+            <div class="stat-label">Total días perdidos (3 períodos)</div>
+            <div class="stat-main"><span class="stat-val" id="ins-dias-usados">—</span><span class="stat-unit">días en total</span></div>
+            <div class="stat-sub" id="ins-dias-usados-sub">—</div>
+          </div>
+
+          <!-- Stat: Días máx P3 + barra colchón -->
+          <div class="stat-card stat-colchon" id="stat-colchon-card">
+            <div class="stat-label">Margen restante en Período 3</div>
+            <div class="colchon-nums">
+              <div style="font-size:0.6rem;color:#64748b;margin-bottom:2px">Usados &nbsp;<span style="color:#94a3b8">/ Máximo permitido</span></div>
+            </div>
+            <div class="colchon-nums">
+              <span class="colchon-usado" id="colchon-usado-num">—</span>
+              <span class="colchon-sep"> días /</span>
+              <span class="colchon-max" id="colchon-max-num">—</span>
+              <span class="colchon-sep"> días</span>
+            </div>
+            <div class="progress-bar-bg" style="margin-top:5px">
+              <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+              <div class="progress-bar-excess" id="progress-excess" style="width:0%"></div>
+            </div>
+            <div class="colchon-resto" id="progress-pct">—</div>
+          </div>
+
+        </div>
+
+        <!-- Conservar IDs legacy para compatibilidad con JS antiguo -->
+        <span id="prog-label-izq" style="display:none"></span>
+        <span id="prog-label-der" style="display:none"></span>
+        <div id="progress-wrap" style="display:none"></div>
+        <span id="ins-dias-max" style="display:none"></span>
+        <span id="ins-dias-max-sub" style="display:none"></span>
+
       </div>
+
     </div>
 
   </div><!-- /main -->
@@ -778,6 +869,16 @@
     const hint = document.getElementById('im-hint');
     row.classList.toggle('abierto', imAbierto);
     if (hint) hint.textContent = imAbierto ? 'cerrar' : 'expandir';
+  }
+
+  // ── TOGGLE: Metodología / fórmulas ───────────────────────
+  let formulaAbierta = false;
+  function toggleFormula() {
+    formulaAbierta = !formulaAbierta;
+    document.getElementById('formula-note').style.display = formulaAbierta ? 'block' : 'none';
+    document.getElementById('btn-formula').textContent = formulaAbierta
+      ? '▲ Ocultar metodología / fórmulas'
+      : '▼ Ver metodología / fórmulas';
   }
 
   // ── TOGGLE: Tramos extra ─────────────────────────────────
@@ -963,6 +1064,7 @@
       aviso.style.display = 'none';
       limpiarTramos();
       actualizarColchon(null, null, null);
+      actualizarHero();
       return;
     }
 
@@ -1026,10 +1128,154 @@
     actualizarTablaTramos(tasaTotal);
     // El colchón usa la Tasa IM (valor de tabla, fijo)
     actualizarColchon(t1, t2, t3, tasaIM);
+    actualizarHero();
+  }
+
+  // ── HERO: KPI principal + recomendación + barra de margen ────
+  function actualizarHero() {
+    const heroCard = document.getElementById('card-hero');
+    const barWrap  = document.getElementById('hero-bar-section');
+    const tasaTotalTxt = document.getElementById('res-tasa-total').textContent;
+
+    if (tasaTotalTxt === '—') {
+      heroCard.className = 'card hero-card';
+      document.getElementById('hero-lead').textContent = '';
+      document.getElementById('hero-dias').textContent = '—';
+      document.getElementById('hero-label').textContent = 'esperando datos';
+      document.getElementById('hero-tasa').textContent  = '—';
+      document.getElementById('hero-tramo').textContent = '—';
+      document.getElementById('hero-cotiz').textContent = '—';
+      document.getElementById('hero-recomendacion').innerHTML =
+        '👋 Para comenzar, ingresa la <strong>Meta Objetivo</strong> arriba y completa la <strong>Masa</strong> y ' +
+        '<strong>Días Perdidos</strong> de los 3 períodos abajo.';
+      barWrap.style.display = 'none';
+      return;
+    }
+
+    const cotizTxt   = document.getElementById('res-cotizacion').textContent;
+    const tramoTxt   = document.getElementById('res-tramo').textContent.replace('Tramo: ', '').replace(/ ⚠.*/, '');
+    const colchonTxt = document.getElementById('res-colchon').textContent;
+    const colchonSub = document.getElementById('res-colchon-sub').textContent;
+    const metaVal    = val('meta-tasa');
+
+    document.getElementById('hero-tasa').textContent  = tasaTotalTxt + ' pts';
+    document.getElementById('hero-tramo').textContent = tramoTxt;
+    document.getElementById('hero-cotiz').textContent = cotizTxt;
+
+    const recEl  = document.getElementById('hero-recomendacion');
+    const leadEl = document.getElementById('hero-lead');
+    const kpiVal = document.getElementById('hero-dias');
+    const kpiLbl = document.getElementById('hero-label');
+
+    if (metaVal === null) {
+      heroCard.className = 'card hero-card';
+      leadEl.textContent = '';
+      kpiVal.textContent = tasaTotalTxt;
+      kpiLbl.textContent = 'puntos de tasa actual';
+      recEl.innerHTML = '💡 Ingresa una <strong>Meta Objetivo</strong> arriba para ver cuántos días de margen quedan disponibles.';
+      barWrap.style.display = 'none';
+      return;
+    }
+
+    if (colchonTxt === '—') {
+      heroCard.className = 'card hero-card';
+      leadEl.textContent = '';
+      kpiVal.textContent = '—';
+      kpiLbl.textContent = 'días disponibles';
+      recEl.textContent = '💡 ' + colchonSub;
+      barWrap.style.display = 'none';
+      return;
+    }
+
+    const metaTramo = TRAMOS.find(t => metaVal >= t.min && metaVal < t.max) || TRAMOS[TRAMOS.length - 1];
+    const metaCotizTxt = metaTramo.tasa.toFixed(2).replace('.', ',') + '%';
+
+    // ── Caso A: P1+P2 solos ya superan la meta (independiente del P3) ──
+    if (colchonTxt === '¡Superada!') {
+      heroCard.className = 'card hero-card exceeded';
+      leadEl.textContent = '✖ Meta superada';
+      kpiVal.textContent = '—';
+      kpiLbl.textContent = 'ya se superó solo con P1 y P2';
+      recEl.innerHTML =
+        `⚠️ Meta superada solo con los Períodos 1 y 2, sin importar el Período 3. ` +
+        `Para volver a la meta, reduce días perdidos en el Período 1 o 2.`;
+      barWrap.style.display = 'none';
+      return;
+    }
+
+    barWrap.style.display = 'block';
+    const boxColchonClass = document.getElementById('box-colchon').className;
+
+    // ── Caso B: el Período 3 ya excedió el máximo permitido ──
+    if (colchonSub.includes('ya superada')) {
+      const deficit = Math.abs(parseInt(colchonTxt.replace(/\D/g, ''), 10)) || 0;
+      heroCard.className = 'card hero-card exceeded';
+      leadEl.textContent = '✖ Debes reducir';
+      kpiVal.textContent = deficit.toLocaleString('es-CL');
+      kpiLbl.textContent = `días perdidos en el Período 3 para volver a ${metaCotizTxt}`;
+      recEl.innerHTML =
+        `⚠️ Límite del Período 3 superado en <strong>${deficit.toLocaleString('es-CL')} días</strong>. ` +
+        `Reduce al menos esa cantidad para volver a la cotización de ${metaCotizTxt}.`;
+      document.getElementById('hero-bar-fill').style.width = '0%';
+      document.getElementById('hero-bar-excess').style.width = '100%';
+      document.getElementById('hero-bar-usado').textContent = `Excedido en ${deficit.toLocaleString('es-CL')} días`;
+      document.getElementById('hero-bar-max').textContent =
+        '/ ' + document.getElementById('colchon-max-num').textContent + ' máximo';
+      return;
+    }
+
+    // ── Caso C: dentro de meta, con margen disponible ──
+    // Semáforo de riesgo según % del margen ya usado (no solo "poco/mucho")
+    const estado = boxColchonClass.includes('tight') ? ' tight'
+      : boxColchonClass.includes('warning') ? ' warning' : ' ok';
+    heroCard.className = 'card hero-card' + estado;
+
+    const usadoPct = parseFloat(document.getElementById('progress-fill').style.width) || 0;
+    const restantePct = Math.max(0, Math.min(100, 100 - usadoPct));
+
+    const esSingular = colchonTxt === '1';
+    const diaPalabra = esSingular ? 'día' : 'días';
+
+    const fraseEstado = estado === ' ok'
+      ? '✔ Aún estás dentro del tramo'
+      : estado === ' warning'
+      ? '⚠ Te estás acercando al límite'
+      : '⚠ Estás muy cerca del límite';
+    leadEl.textContent = fraseEstado;
+    kpiVal.textContent = colchonTxt;
+    kpiLbl.textContent = (esSingular ? 'día perdido más' : 'días perdidos más') + ' sin aumentar la cotización';
+
+    // El ícono y el tono del mensaje siguen el mismo semáforo que el resto de la tarjeta
+    const iconoRec = estado === ' ok' ? '✅' : '⚠️';
+    const prefijoRec = estado === ' ok' ? '' : '<strong>Margen crítico:</strong> ';
+    recEl.innerHTML =
+      `${iconoRec} ${prefijoRec}Puedes registrar ${estado === ' ok' ? 'hasta' : 'solo'} ` +
+      `<strong>${colchonTxt} ${diaPalabra}</strong> perdido${esSingular ? '' : 's'} adicional${esSingular ? '' : 'es'} ` +
+      `en el Período 3. Si lo superas, la empresa pasará al siguiente tramo, aumentando la cotización adicional.`;
+
+    // Barra de dos colores: verde = días restantes, rojo = días ya usados
+    // (el verde se va "comiendo" a medida que se pierden días en el Período 3)
+    document.getElementById('hero-bar-fill').style.width = restantePct + '%';
+    document.getElementById('hero-bar-excess').style.width = usadoPct + '%';
+    document.getElementById('hero-bar-usado').textContent = `${colchonTxt} ${diaPalabra} restante${esSingular ? '' : 's'} (${restantePct.toFixed(0)}% del margen)`;
+    document.getElementById('hero-bar-max').textContent =
+      'usados: ' + document.getElementById('colchon-usado-num').textContent +
+      ' / ' + document.getElementById('colchon-max-num').textContent + ' máx.';
   }
 
   function ocultarInsights() {
     document.getElementById('insight-panel').style.display = 'none';
+    document.getElementById('btn-detalle').style.display = 'none';
+  }
+
+  // ── TOGGLE: Detalle del cálculo (panel de 4 stat-cards) ──
+  let detalleAbierto = false;
+  function toggleDetalle() {
+    detalleAbierto = !detalleAbierto;
+    document.getElementById('insight-panel').style.display = detalleAbierto ? 'grid' : 'none';
+    document.getElementById('btn-detalle').textContent = detalleAbierto
+      ? '▲ Ocultar detalle del cálculo'
+      : '▼ Ver detalle del cálculo';
   }
 
   function actualizarColchon(t1, t2, t3, tsIM = 0) {
@@ -1093,20 +1339,26 @@
       return;
     }
 
+    // Semáforo de riesgo según % del margen ya usado (no solo un umbral)
+    const pctUsadoPreview = diasMax > 0 ? (diasActual / diasMax) * 100 : 0;
     resVal.textContent = Math.floor(colchon).toLocaleString('es-CL');
     if (colchon < 0) {
       resSub.textContent = `Meta ya superada (máx: ${Math.floor(diasMax)})`;
       box.className = 'result-box colchon exceeded';
-    } else if (colchon < diasMax * 0.15) {
+    } else if (pctUsadoPreview >= 85) {
       resSub.textContent = `días restantes · máx P3: ${Math.floor(diasMax)}`;
       box.className = 'result-box colchon tight';
+    } else if (pctUsadoPreview >= 60) {
+      resSub.textContent = `días restantes · máx P3: ${Math.floor(diasMax)}`;
+      box.className = 'result-box colchon warning';
     } else {
       resSub.textContent = `días restantes · máx P3: ${Math.floor(diasMax)}`;
       box.className = 'result-box colchon ok';
     }
 
-    // ── Panel de insights ─────────────────────────────────────────
-    document.getElementById('insight-panel').style.display = 'grid';
+    // ── Panel de insights (colapsado por defecto, botón para expandir) ──
+    document.getElementById('btn-detalle').style.display = 'block';
+    document.getElementById('insight-panel').style.display = detalleAbierto ? 'grid' : 'none';
 
     // — Meta
     const metaTramo = TRAMOS.find(t => meta >= t.min && meta < t.max) || TRAMOS[TRAMOS.length-1];
@@ -1154,13 +1406,14 @@
 
     const colchonCard = document.getElementById('stat-colchon-card');
     colchonCard.className = 'stat-card stat-colchon' +
-      (colchon < 0 ? ' exceeded' : (pctUsado > 75 ? ' tight' : ''));
+      (colchon < 0 ? ' exceeded' : (pctUsado >= 85 ? ' tight' : (pctUsado >= 60 ? ' warning' : '')));
 
     dibujarGrafico(totalDiasUsados, totalMax);
   }
 
   function dibujarGrafico(diasGastados, diasMax) {
     const canvas = document.getElementById('grafico-dona');
+    if (!canvas) return; // donut removido — reemplazado por barra en hero-card
     const ctx    = canvas.getContext('2d');
     const cx = canvas.width  / 2;
     const cy = canvas.height / 2;
@@ -1301,8 +1554,25 @@
     ocultarInsights();
     limpiarTramos();
     dibujarGrafico(null, null);
+    actualizarHero();
   }
 
+  // ── Años reales de cada período, calculados desde la fecha actual ──
+  // Período 3 = período fiscal (jul→jun) en curso o recién terminado.
+  function mostrarAniosPeriodos() {
+    const hoy = new Date();
+    const anioActual = hoy.getFullYear();
+    const mesActual  = hoy.getMonth() + 1; // 1-12
+    // Si estamos en jul-dic, el período en curso empezó este año; si estamos en ene-jun, empezó el año pasado
+    const inicioP3 = (mesActual >= 7) ? anioActual : anioActual - 1;
+
+    const fmt = inicioAnio => `jul ${inicioAnio} – jun ${inicioAnio + 1}`;
+    document.getElementById('anio-p3').textContent = fmt(inicioP3);
+    document.getElementById('anio-p2').textContent = fmt(inicioP3 - 1);
+    document.getElementById('anio-p1').textContent = fmt(inicioP3 - 2);
+  }
+
+  mostrarAniosPeriodos();
   recalcular();
 </script>
 </body>
