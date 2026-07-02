@@ -102,11 +102,12 @@
     .meta-bar input.invalida { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
 
     .btn-reset {
-      padding: 6px 14px; background: transparent; color: #d0e4f7;
-      border: 1px solid rgba(255,255,255,0.35); border-radius: 6px; font-size: 0.72rem;
-      font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s; white-space: nowrap;
+      padding: 6px 14px; background: #fff; color: #1A3A6B;
+      border: 2px solid rgba(255,255,255,0.5); border-radius: 6px;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, color 0.2s; white-space: nowrap;
     }
-    .btn-reset:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .btn-reset:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
     /* ── MAIN ────────────────────────────────────────────── */
     .main {
@@ -201,6 +202,17 @@
     .periodo-info strong { color: #E8501C; }
 
     .periodo-anio { font-size: 0.6rem; font-weight: 400; color: #a8c4e8; text-transform: none; letter-spacing: 0; }
+
+    /* ── BOTÓN MOSTRAR/OCULTAR COSTOS ─────────────────────── */
+    .btn-costos {
+      font-size: 0.66rem; font-weight: 700; padding: 5px 11px;
+      border: 1.5px solid #E8501C; border-radius: 5px;
+      background: #FDF2ED; color: #c94318; cursor: pointer;
+      white-space: nowrap; transition: background 0.15s, color 0.15s;
+    }
+    .btn-costos:hover { background: #E8501C; color: #fff; }
+    .btn-costos.oculto { background: #E8501C; color: #fff; }
+    .btn-costos.oculto:hover { background: #c94318; }
 
     /* ── RESULT BOXES ────────────────────────────────────── */
     .results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
@@ -324,11 +336,17 @@
     .im-toggle-chevron {
       display: inline-flex; align-items: center; justify-content: center;
       width: 18px; height: 18px; border-radius: 4px;
-      background: #1A3A6B; color: #fff;
+      background: #E8501C; color: #fff;
       font-size: 0.7rem; flex-shrink: 0;
       transition: transform 0.2s, background 0.15s;
+      animation: pulso-chevron 1.8s ease-in-out infinite;
     }
-    .im-header.abierto .im-toggle-chevron { transform: rotate(180deg); background: #E8501C; }
+    .im-header.abierto .im-toggle-chevron { transform: rotate(180deg); background: #1A3A6B; animation: none; }
+
+    @keyframes pulso-chevron {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(232,80,28,0.55); }
+      50%      { box-shadow: 0 0 0 5px rgba(232,80,28,0); }
+    }
     .im-toggle-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3px; flex: 1; }
     .im-toggle-hint {
       font-size: 0.6rem; font-weight: 400; opacity: 0.7;
@@ -558,7 +576,10 @@
   <!-- ── HEADER ───────────────────────────────────────────── -->
   <div class="header">
     <div class="header-left">
-      <h1>DS67 — Calculador Tasa de Cotización Adicional</h1>
+      <div>
+        <h1>DS67 — Calculador Tasa de Cotización Adicional</h1>
+        <p>Contacto: Tomás González · <a href="mailto:tomas.gonzalez.s@ist.cl" style="color:#a8c4e8;">tomas.gonzalez.s@ist.cl</a></p>
+      </div>
     </div>
 
     <div class="meta-bar" id="meta-bar-cotiz">
@@ -599,7 +620,7 @@
             <div class="hero-label" id="hero-label">días disponibles</div>
           </div>
           <div class="hero-secondary">
-            <div class="hero-sec-item"><span>Tasa actual</span><strong id="hero-tasa">—</strong></div>
+            <div class="hero-sec-item"><span>Tasa Siniestralidad</span><strong id="hero-tasa">—</strong></div>
             <div class="hero-sec-item"><span>Tramo</span><strong id="hero-tramo">—</strong></div>
             <div class="hero-sec-item"><span>Cotización</span><strong id="hero-cotiz">—</strong></div>
           </div>
@@ -731,9 +752,7 @@
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <h2 style="margin-bottom:0">Tabla de Tramos — Cotización Adicional DS67</h2>
-          <button id="btn-toggle-costo" onclick="toggleCostoCol()"
-            style="font-size:0.62rem; padding:3px 8px; border:1px solid #b0c0d8; border-radius:4px;
-                   background:#eef2f9; color:#1A3A6B; cursor:pointer; white-space:nowrap;">
+          <button id="btn-toggle-costo" class="btn-costos" onclick="toggleCostoCol()">
             💰 Ocultar costos $
           </button>
         </div>
@@ -915,8 +934,9 @@
     const barCotiz = document.getElementById('meta-bar-cotiz');
     if (barCotiz) barCotiz.style.display = costosVisibles ? '' : 'none';
     // Actualizar texto del botón
-    document.getElementById('btn-toggle-costo').textContent =
-      costosVisibles ? '💰 Ocultar costos $' : '💰 Mostrar costos $';
+    const btnCostos = document.getElementById('btn-toggle-costo');
+    btnCostos.textContent = costosVisibles ? '💰 Ocultar costos $' : '💰 Mostrar costos $';
+    btnCostos.classList.toggle('oculto', !costosVisibles);
   }
 
   let tramosAbierto = false;
@@ -1194,7 +1214,7 @@
       heroCard.className = 'card hero-card';
       leadEl.textContent = '';
       kpiVal.textContent = tasaTotalTxt;
-      kpiLbl.textContent = 'puntos de tasa actual';
+      kpiLbl.textContent = 'puntos de Tasa Siniestralidad';
       recEl.innerHTML = '💡 Ingresa una <span class="link-campo" onclick="irACampo(\'meta-tasa\')">Meta Objetivo</span> arriba para ver cuántos días de margen quedan disponibles.';
       barWrap.style.display = 'none';
       return;
@@ -1598,6 +1618,7 @@
 
   mostrarAniosPeriodos();
   recalcular();
+  toggleCostoCol(); // oculto por defecto
 </script>
 </body>
 </html>
