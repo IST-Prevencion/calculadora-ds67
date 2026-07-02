@@ -64,8 +64,8 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.25);
+      background: #FDF2ED;
+      border: 1px solid #F47B50;
       border-radius: 8px;
       padding: 5px 12px;
     }
@@ -73,10 +73,10 @@
     .meta-bar-icon { font-size: 1.2rem; }
     .meta-bar-label { line-height: 1.2; }
     .meta-bar-label span:first-child {
-      display: block; font-size: 0.62rem; color: #a8c4e8;
+      display: block; font-size: 0.62rem; color: #1A3A6B; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.4px;
     }
-    .meta-bar-label span:last-child { font-size: 0.72rem; color: #d0e4f7; }
+    .meta-bar-label span:last-child { font-size: 0.72rem; color: #64748b; }
 
     .meta-bar input {
       width: 96px; padding: 5px 10px;
@@ -86,9 +86,18 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .meta-bar input::placeholder { color: #94a3b8; font-size: 0.8rem; font-weight: 400; }
+
+    /* Pulso de atención mientras el campo está vacío — se detiene al llenarlo o al hacer foco */
+    @keyframes pulso-campo {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(232,80,28,0.75); }
+      50%      { box-shadow: 0 0 0 7px rgba(232,80,28,0); }
+    }
+    .meta-bar input:placeholder-shown { animation: pulso-campo 1.6s ease-in-out infinite; }
+
     .meta-bar input:focus {
       outline: none; border-color: #F47B50;
       box-shadow: 0 0 0 2px rgba(232,80,28,0.25);
+      animation: none;
     }
     .meta-bar input.invalida { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
 
@@ -513,6 +522,11 @@
       border-radius: 0 5px 5px 0; padding: 7px 10px;
     }
     .hero-recomendacion strong { color: #1A3A6B; }
+    .hero-recomendacion .link-campo {
+      color: #E8501C; font-weight: 700; cursor: pointer;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .hero-recomendacion .link-campo:hover { color: #c94318; }
 
     /* ── BOTÓN PDF ───────────────────────────────────────── */
     .btn-pdf {
@@ -532,7 +546,7 @@
       .left-col, .right-col { overflow: visible !important; }
       .left-col { overflow-y: visible !important; }
       .tramos-scroll-wrap { max-height: none !important; overflow: visible !important; }
-      .btn-pdf, .btn-reset, #btn-toggle-costo, .btn-toggle-tramos { display: none !important; }
+      .btn-pdf, .btn-reset, #btn-toggle-costo, .btn-toggle-tramos, .btn-toggle-formula { display: none !important; }
       .card { break-inside: avoid; box-shadow: none !important; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
@@ -561,7 +575,7 @@
         <span>Meta Objetivo</span>
       </div>
       <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-        <span style="font-size:0.62rem; color:#a8c4e8; text-transform:uppercase; letter-spacing:0.4px;">Tasa total a no superar</span>
+        <span style="font-size:0.62rem; color:#c94318; font-weight:700; text-transform:uppercase; letter-spacing:0.4px;">Tasa total a no superar</span>
         <input type="number" id="meta-tasa" min="0" step="0.01" placeholder="ej: 63" oninput="recalcular()">
       </div>
     </div>
@@ -871,6 +885,14 @@
     if (hint) hint.textContent = imAbierto ? 'cerrar' : 'expandir';
   }
 
+  // Lleva el cursor a un campo (usado por los links de instrucción del hero)
+  function irACampo(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.focus({ preventScroll: true });
+  }
+
   // ── TOGGLE: Metodología / fórmulas ───────────────────────
   let formulaAbierta = false;
   function toggleFormula() {
@@ -1146,8 +1168,9 @@
       document.getElementById('hero-tramo').textContent = '—';
       document.getElementById('hero-cotiz').textContent = '—';
       document.getElementById('hero-recomendacion').innerHTML =
-        '👋 Para comenzar, ingresa la <strong>Meta Objetivo</strong> arriba y completa la <strong>Masa</strong> y ' +
-        '<strong>Días Perdidos</strong> de los 3 períodos abajo.';
+        '👋 Para comenzar, ingresa la <span class="link-campo" onclick="irACampo(\'meta-tasa\')">Meta Objetivo</span> arriba y completa la ' +
+        '<span class="link-campo" onclick="irACampo(\'masa1\')">Masa</span> y ' +
+        '<span class="link-campo" onclick="irACampo(\'dias1\')">Días Perdidos</span> de los 3 períodos abajo.';
       barWrap.style.display = 'none';
       return;
     }
@@ -1172,7 +1195,7 @@
       leadEl.textContent = '';
       kpiVal.textContent = tasaTotalTxt;
       kpiLbl.textContent = 'puntos de tasa actual';
-      recEl.innerHTML = '💡 Ingresa una <strong>Meta Objetivo</strong> arriba para ver cuántos días de margen quedan disponibles.';
+      recEl.innerHTML = '💡 Ingresa una <span class="link-campo" onclick="irACampo(\'meta-tasa\')">Meta Objetivo</span> arriba para ver cuántos días de margen quedan disponibles.';
       barWrap.style.display = 'none';
       return;
     }
@@ -1209,16 +1232,17 @@
     // ── Caso B: el Período 3 ya excedió el máximo permitido ──
     if (colchonSub.includes('ya superada')) {
       const deficit = Math.abs(parseInt(colchonTxt.replace(/\D/g, ''), 10)) || 0;
+      const defSing = deficit === 1;
       heroCard.className = 'card hero-card exceeded';
       leadEl.textContent = '✖ Debes reducir';
       kpiVal.textContent = deficit.toLocaleString('es-CL');
-      kpiLbl.textContent = `días perdidos en el Período 3 para volver a ${metaCotizTxt}`;
+      kpiLbl.textContent = `${defSing ? 'día perdido' : 'días perdidos'} en el Período 3 para volver a ${metaCotizTxt}`;
       recEl.innerHTML =
-        `⚠️ Límite del Período 3 superado en <strong>${deficit.toLocaleString('es-CL')} días</strong>. ` +
+        `⚠️ Límite del Período 3 superado en <strong>${deficit.toLocaleString('es-CL')} ${defSing ? 'día' : 'días'}</strong>. ` +
         `Reduce al menos esa cantidad para volver a la cotización de ${metaCotizTxt}.`;
       document.getElementById('hero-bar-fill').style.width = '0%';
       document.getElementById('hero-bar-excess').style.width = '100%';
-      document.getElementById('hero-bar-usado').textContent = `Excedido en ${deficit.toLocaleString('es-CL')} días`;
+      document.getElementById('hero-bar-usado').textContent = `Excedido en ${deficit.toLocaleString('es-CL')} ${defSing ? 'día' : 'días'}`;
       document.getElementById('hero-bar-max').textContent =
         '/ ' + document.getElementById('colchon-max-num').textContent + ' máximo';
       return;
