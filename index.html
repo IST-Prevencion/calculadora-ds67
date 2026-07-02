@@ -323,6 +323,23 @@
     }
     .btn-toggle-formula:hover { background: #eef2f9; color: #1A3A6B; }
 
+    /* ── TABLA LOOKUP FACTOR IM → TASA IM ─────────────────── */
+    .tabla-im-lookup { margin-top: 7px; }
+    .tabla-im-mini { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
+    .tabla-im-mini th {
+      background: #1A3A6B; color: #fff; padding: 4px 8px;
+      font-size: 0.65rem; text-align: left;
+    }
+    .tabla-im-mini th:last-child { text-align: center; width: 70px; }
+    .tabla-im-mini td { padding: 3px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    .tabla-im-mini td:last-child { text-align: center; font-weight: 700; color: #c94318; }
+    .tabla-im-mini tr:nth-child(even) td { background: #f7f9fc; }
+    .tabla-im-nota {
+      font-size: 0.62rem; color: #64748b; background: #f7f9fc;
+      border-left: 3px solid #E8501C; padding: 4px 8px;
+      border-radius: 0 3px 3px 0; margin-top: 5px;
+    }
+
     /* ── BOTÓN TOGGLE IM ─────────────────────────────────── */
     .im-header td { transition: background 0.15s; }
     .im-header:hover td { background: #dce6f5 !important; }
@@ -798,6 +815,41 @@
       </div>
 
       <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; cursor:pointer;" onclick="toggleTablaIM()">
+          <h2 style="margin-bottom:0">Tabla Factor IM → Tasa IM (Art. 2° j DS67)</h2>
+          <span class="im-toggle-chevron" id="chevron-tabla-im" style="background:#E8501C;">▼</span>
+        </div>
+        <div id="tabla-im-wrap" style="display:none">
+          <div class="tramos-scroll-wrap">
+            <table class="tabla-tramos" id="tabla-im-mini">
+              <thead>
+                <tr>
+                  <th>Promedio de Factores de Invalideces y Muertes</th>
+                  <th>Tasa IM</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-im-body">
+                <tr data-min="0.00" data-max="0.11"><td>0,00 a 0,10</td><td class="td-total">0</td><td id="estado-im-0">—</td></tr>
+                <tr data-min="0.11" data-max="0.31"><td>0,11 a 0,30</td><td class="td-total">35</td><td id="estado-im-1">—</td></tr>
+                <tr data-min="0.31" data-max="0.51"><td>0,31 a 0,50</td><td class="td-total">70</td><td id="estado-im-2">—</td></tr>
+                <tr data-min="0.51" data-max="0.71"><td>0,51 a 0,70</td><td class="td-total">105</td><td id="estado-im-3">—</td></tr>
+                <tr data-min="0.71" data-max="0.91"><td>0,71 a 0,90</td><td class="td-total">140</td><td id="estado-im-4">—</td></tr>
+                <tr data-min="0.91" data-max="1.21"><td>0,91 a 1,20</td><td class="td-total">175</td><td id="estado-im-5">—</td></tr>
+                <tr data-min="1.21" data-max="1.51"><td>1,21 a 1,50</td><td class="td-total">210</td><td id="estado-im-6">—</td></tr>
+                <tr data-min="1.51" data-max="1.81"><td>1,51 a 1,80</td><td class="td-total">245</td><td id="estado-im-7">—</td></tr>
+                <tr data-min="1.81" data-max="2.11"><td>1,81 a 2,10</td><td class="td-total">280</td><td id="estado-im-8">—</td></tr>
+                <tr data-min="2.11" data-max="2.41"><td>2,11 a 2,40</td><td class="td-total">315</td><td id="estado-im-9">—</td></tr>
+                <tr data-min="2.41" data-max="2.71"><td>2,41 a 2,70</td><td class="td-total">350</td><td id="estado-im-10">—</td></tr>
+                <tr data-min="2.71" data-max="999999"><td>2,71 y más</td><td class="td-total">385</td><td id="estado-im-11">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tabla-im-nota">ℹ️ Es una tabla por tramos (Art. 2° letra j del DS67), no proporcional: subir de tramo agrega ese valor de golpe.</div>
+        </div>
+      </div>
+
+      <div class="card">
         <h2>Resultados</h2>
 
         <!-- Fila principal: 3 KPIs -->
@@ -912,6 +964,32 @@
     el.focus({ preventScroll: true });
   }
 
+  // ── TOGGLE: Tabla Factor promedio → Tasa IM ──────────────
+  let tablaIMAbierta = false;
+  function toggleTablaIM() {
+    tablaIMAbierta = !tablaIMAbierta;
+    document.getElementById('tabla-im-wrap').style.display = tablaIMAbierta ? 'block' : 'none';
+    const chevron = document.getElementById('chevron-tabla-im');
+    chevron.style.transform = tablaIMAbierta ? 'rotate(180deg)' : 'none';
+  }
+
+  // Resalta el tramo de la tabla Factor IM → Tasa IM que corresponde al promedio actual
+  function actualizarTablaIM(promedioFactorIM) {
+    const rows = document.querySelectorAll('#tabla-im-body tr');
+    rows.forEach((row, i) => {
+      const min = parseFloat(row.dataset.min);
+      const max = parseFloat(row.dataset.max);
+      const estadoEl = document.getElementById('estado-im-' + i);
+      if (promedioFactorIM !== null && promedioFactorIM >= min && promedioFactorIM < max) {
+        row.classList.add('active-tramo');
+        estadoEl.textContent = '✔ Aplica';
+      } else {
+        row.classList.remove('active-tramo');
+        estadoEl.textContent = '—';
+      }
+    });
+  }
+
   // ── TOGGLE: Metodología / fórmulas ───────────────────────
   let formulaAbierta = false;
   function toggleFormula() {
@@ -1014,7 +1092,13 @@
     return isNaN(v) ? null : v;
   }
 
-  // Factor IM período i = (Σ peso×casos / Masa) × 100
+  // Redondeo a 2 decimales "hacia arriba si el 3er decimal es >= 5"
+  // (Art. 2° letra h del DS67 — igual a un redondeo estándar para valores positivos)
+  function redondear2(x) {
+    return Math.round((x + Number.EPSILON) * 100) / 100;
+  }
+
+  // Factor IM período i = (Σ peso×casos / Masa) × 100, redondeado a 2 decimales (Art. 2° j.3)
   function getFactorIM(i) {
     const masa = val('masa' + i);
     const el   = document.getElementById('factor_im' + i);
@@ -1029,18 +1113,19 @@
     });
 
     if (!tieneCasos) { el.value = ''; return null; }
-    const factor = (suma / masa) * 100;
-    el.value = factor.toFixed(4);
+    const factor = redondear2((suma / masa) * 100);
+    el.value = factor.toFixed(2);
     return factor;
   }
 
+  // Tasa IT por período = (Días/Masa) × 100, redondeada a 2 decimales (Art. 2° letra h)
   function getTasaperiodo(i) {
     const dias  = val('dias' + i);
     const masa  = val('masa' + i);
     const el    = document.getElementById('tasa' + i);
     if (dias !== null && masa !== null && masa > 0) {
-      const calc = (dias / masa) * 100;
-      el.value = calc.toFixed(4);
+      const calc = redondear2((dias / masa) * 100);
+      el.value = calc.toFixed(2);
       return calc;
     }
     el.value = '';
@@ -1105,6 +1190,7 @@
       document.getElementById('res-tramo').textContent = '—';
       aviso.style.display = 'none';
       limpiarTramos();
+      actualizarTablaIM(null);
       actualizarColchon(null, null, null);
       actualizarHero();
       return;
@@ -1122,7 +1208,7 @@
     // ── FACTOR IM PROMEDIO y TASA IM (Art. 2° j) ─────────────────
     // Promedio de los 3 factores ÷3 (vacíos = 0), con 2 decimales
     // Luego lookup en tabla para obtener Tasa IM
-    const promedioFactorIM = ((im1 ?? 0) + (im2 ?? 0) + (im3 ?? 0)) / 3;
+    const promedioFactorIM = redondear2(((im1 ?? 0) + (im2 ?? 0) + (im3 ?? 0)) / 3);
     const tasaIM = getTasaIM(promedioFactorIM);
 
     // ── TASA TOTAL (Art. 2° k) ────────────────────────────────────
@@ -1168,8 +1254,9 @@
     else if (tramoFinal.tasa > 0) box.classList.add('warning');
 
     actualizarTablaTramos(tasaTotal);
+    actualizarTablaIM(promedioFactorIM);
     // El colchón usa la Tasa IM (valor de tabla, fijo)
-    actualizarColchon(t1, t2, t3, tasaIM);
+    actualizarColchon(t1, t2, t3, tasaIM, tsIT);
     actualizarHero();
   }
 
@@ -1233,15 +1320,21 @@
     const metaTramo = TRAMOS.find(t => metaVal >= t.min && metaVal < t.max) || TRAMOS[TRAMOS.length - 1];
     const metaCotizTxt = metaTramo.tasa.toFixed(2).replace('.', ',') + '%';
 
-    // ── Caso A: P1+P2 solos ya superan la meta (independiente del P3) ──
+    // ── Caso A: la meta ya es imposible de cumplir aun con 0 días en P3 ──
+    // (puede deberse a los accidentes de P1+P2, o a las Invalideces/Muertes — colchonSub ya trae el detalle)
     if (colchonTxt === '¡Superada!') {
+      const esPorIM = colchonSub.includes('Invalideces');
+      const deficitMatch = colchonSub.match(/en ([\d,.]+) pts/);
+      const deficitTxt = deficitMatch ? deficitMatch[1] : '';
       heroCard.className = 'card hero-card exceeded';
       leadEl.textContent = '✖ Meta superada';
-      kpiVal.textContent = '—';
-      kpiLbl.textContent = 'ya se superó solo con P1 y P2';
-      recEl.innerHTML =
-        `⚠️ Meta superada solo con los Períodos 1 y 2, sin importar el Período 3. ` +
-        `Para volver a la meta, reduce días perdidos en el Período 1 o 2.`;
+      kpiVal.textContent = deficitTxt || '—';
+      kpiLbl.textContent = 'pts sobre la meta, aun con 0 días en P3';
+      recEl.innerHTML = esPorIM
+        ? `⚠️ La meta ya se superó en <strong>${deficitTxt} pts</strong> por las <strong>Incapacidades/Muertes</strong> ` +
+          `registradas, sin importar los días perdidos. Reduce casos de invalidez o sube la meta.`
+        : `⚠️ La meta ya se superó en <strong>${deficitTxt} pts</strong> solo con los Períodos 1 y 2, ` +
+          `sin importar el Período 3. Para volver a la meta, reduce días perdidos en el Período 1 o 2.`;
       barWrap.style.display = 'none';
       return;
     }
@@ -1322,7 +1415,7 @@
       : '▼ Ver detalle del cálculo';
   }
 
-  function actualizarColchon(t1, t2, t3, tsIM = 0) {
+  function actualizarColchon(t1, t2, t3, tsIM = 0, tsITreal = 0) {
     const meta   = val('meta-tasa');
     const masa3  = val('masa3');
     const dias3  = val('dias3');
@@ -1375,8 +1468,17 @@
 
     // ── Caja colchón ─────────────────────────────────────────────
     if (t3Max < 0) {
+      // Tasa mínima posible: la que resultaría con 0 días perdidos en el Período 3
+      // (mejor caso posible). Si igual supera la meta, es matemáticamente imposible
+      // cumplirla este ciclo — y hay que decir POR QUÉ (IT de P1/P2 o IM).
+      const tsIT_mejorCaso = Math.round((t1 + t2 + 0) / 3);
+      const tasaMinima = tsIT_mejorCaso + tsIM;
+      const deficitPts = Math.round((tasaMinima - meta) * 100) / 100;
+      const culpaIM = tsIM >= tsIT_mejorCaso;
+
       resVal.textContent = '¡Superada!';
-      resSub.textContent = 'P1+P2 ya superan la meta';
+      resSub.textContent = `Supera la meta en ${deficitPts} pts aun con 0 días en P3` +
+        (culpaIM ? ' — por Invalideces/Muertes' : ' — por P1+P2');
       box.className = 'result-box colchon exceeded';
       ocultarInsights();
       dibujarGrafico(totalDiasUsados, totalDiasUsados);
@@ -1410,21 +1512,22 @@
     document.getElementById('ins-meta-desc').textContent =
       `Si la tasa total no supera ${meta}, la cotización adicional es ${metaTramo.tasa.toFixed(2).replace('.',',')}%`;
 
-    // — Desglose IT/IM split bar
-    const totalTasa = metaIT + tsIM;
-    const pctIT = totalTasa > 0 ? (metaIT / totalTasa) * 100 : 100;
-    const pctIM = totalTasa > 0 ? (tsIM  / totalTasa) * 100 : 0;
+    // — Desglose IT/IM split bar (composición REAL de la tasa total actual,
+    //   no la meta — metaIT es solo un valor auxiliar para el cálculo del colchón)
+    const totalTasa = tsITreal + tsIM;
+    const pctIT = totalTasa > 0 ? (tsITreal / totalTasa) * 100 : 100;
+    const pctIM = totalTasa > 0 ? (tsIM     / totalTasa) * 100 : 0;
     const splitIT = document.getElementById('split-it-bar');
     const splitIM = document.getElementById('split-im-bar');
     splitIT.style.width = pctIT + '%';
     splitIM.style.width = pctIM + '%';
-    document.getElementById('split-it-lbl').textContent = metaIT > 0 ? `Accidentes ${metaIT}` : '';
-    document.getElementById('split-im-lbl').textContent = tsIM   > 0 ? `Inv./Muertes ${tsIM}` : '';
+    document.getElementById('split-it-lbl').textContent = tsITreal > 0 ? `Accidentes ${tsITreal}` : '';
+    document.getElementById('split-im-lbl').textContent = tsIM     > 0 ? `Inv./Muertes ${tsIM}` : '';
     const imTexto = tsIM > 0
       ? `Incapacidades/Muertes aportan ${tsIM} puntos`
       : `Sin casos de invalidez ni muertes`;
     document.getElementById('ins-desglose-sub').textContent =
-      `Accidentes: ${metaIT} pts  +  Inv./Muertes: ${tsIM} pts  =  ${totalTasa} total  ·  ${imTexto}`;
+      `Accidentes: ${tsITreal} pts  +  Inv./Muertes: ${tsIM} pts  =  ${totalTasa} total  ·  ${imTexto}`;
 
     // — Días usados
     document.getElementById('ins-dias-usados').textContent =
@@ -1597,6 +1700,7 @@
     if (chkRecargo) chkRecargo.checked = false;
     ocultarInsights();
     limpiarTramos();
+    actualizarTablaIM(null);
     dibujarGrafico(null, null);
     actualizarHero();
   }
