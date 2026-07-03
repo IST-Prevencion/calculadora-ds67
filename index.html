@@ -194,6 +194,23 @@
       border-radius: 0 3px 3px 0; margin-top: 7px;
     }
 
+    .formula-calculo { margin-top: 8px; }
+    .formula-calculo-titulo {
+      font-size: 0.62rem; font-weight: 700; color: #1A3A6B;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      margin: 8px 0 4px; padding-top: 6px; border-top: 1px dashed #dde3ec;
+    }
+    .formula-calculo-titulo:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+    .formula-linea {
+      font-size: 0.68rem; color: #334155; line-height: 1.6;
+      font-family: 'Consolas', 'Courier New', monospace;
+    }
+    .formula-linea .fl-resultado { color: #E8501C; font-weight: 700; }
+    .formula-linea.fl-final {
+      margin-top: 3px; padding-top: 4px; border-top: 1px solid #dde3ec;
+      color: #1A3A6B; font-weight: 700; font-family: inherit;
+    }
+
     .periodo-info {
       font-size: 0.68rem; color: #1A3A6B; background: #eef2f9;
       border-left: 3px solid #1A3A6B; padding: 5px 8px;
@@ -752,6 +769,7 @@
           <strong>TS IT</strong> = (Días/Masa)×100 por período → promedio entero &nbsp;·&nbsp;
           <strong>Factor IM</strong> = (Σ valor×casos/Masa)×100 → promedio → tabla Tasa IM &nbsp;·&nbsp;
           <strong>Tasa Total</strong> = TS IT (entero) + Tasa IM (tabla)
+          <div class="formula-calculo" id="formula-calculo"></div>
         </div>
         <label class="recargo-label">
           <input type="checkbox" id="chk-recargo" onchange="recalcular()">
@@ -990,6 +1008,44 @@
     });
   }
 
+  // Arma el desglose paso a paso, con los valores reales del usuario, de cómo
+  // se llega a la Tasa Total Siniestralidad (para "Ver metodología / fórmulas")
+  function actualizarFormulaCalculo({ t1, t2, t3, tsITcrudo, tsIT, im1, im2, im3, promedioFactorIM, tasaIM, tasaTotal }) {
+    const wrap = document.getElementById('formula-calculo');
+    const fmt2 = v => v.toFixed(2).replace('.', ',');
+    const dias  = [1, 2, 3].map(i => val('dias' + i));
+    const masas = [1, 2, 3].map(i => val('masa' + i));
+    const tasasIT = [t1, t2, t3];
+    const factoresIM = [im1, im2, im3];
+
+    let html = '<div class="formula-calculo-titulo">Tasa IT — Incapacidades Temporales</div>';
+    tasasIT.forEach((t, i) => {
+      html += t !== null
+        ? `<div class="formula-linea">P${i+1}: (${dias[i]} días / ${masas[i]} trab.) × 100 = <span class="fl-resultado">${fmt2(t)}</span></div>`
+        : `<div class="formula-linea">P${i+1}: sin datos → se considera 0</div>`;
+    });
+    html += `<div class="formula-linea">Promedio: (${tasasIT.map(t => fmt2(t ?? 0)).join(' + ')}) ÷ 3 = ${fmt2(tsITcrudo)} ` +
+      `→ redondeado = <span class="fl-resultado">${tsIT}</span></div>`;
+
+    html += '<div class="formula-calculo-titulo">Tasa IM — Invalideces y Muertes</div>';
+    const hayCasos = factoresIM.some(f => f !== null);
+    if (!hayCasos) {
+      html += `<div class="formula-linea">Sin casos registrados → Tasa IM = <span class="fl-resultado">0</span></div>`;
+    } else {
+      factoresIM.forEach((f, i) => {
+        html += f !== null
+          ? `<div class="formula-linea">P${i+1}: factor = <span class="fl-resultado">${fmt2(f)}</span></div>`
+          : `<div class="formula-linea">P${i+1}: sin casos → factor 0</div>`;
+      });
+      html += `<div class="formula-linea">Promedio: (${factoresIM.map(f => fmt2(f ?? 0)).join(' + ')}) ÷ 3 = ${fmt2(promedioFactorIM)} ` +
+        `→ tabla Tasa IM = <span class="fl-resultado">${tasaIM}</span></div>`;
+    }
+
+    html += `<div class="formula-linea fl-final">Tasa Total = Tasa IT (${tsIT}) + Tasa IM (${tasaIM}) = ${tasaTotal} pts</div>`;
+
+    wrap.innerHTML = html;
+  }
+
   // ── TOGGLE: Metodología / fórmulas ───────────────────────
   let formulaAbierta = false;
   function toggleFormula() {
@@ -1132,10 +1188,6 @@
     return null;
   }
 
-  function getTramo(tasaTotal) {
-    return TRAMOS.find(t => tasaTotal >= t.min && tasaTotal < t.max) || TRAMOS[TRAMOS.length - 1];
-  }
-
   function validarMeta() {
     const input = document.getElementById('meta-tasa');
     const v = parseFloat(input.value);
@@ -1161,7 +1213,6 @@
       const baseImponible = base / 0.0093;
       const tasaTotal = parseFloat(tr.dataset.total) / 100;
       const costo = Math.round(baseImponible * tasaTotal);
-      const diff  = costo - Math.round(base);
       celda.textContent = '$' + costo.toLocaleString('es-CL') +
         (i > 0 ? '  (+$' + (costo - Math.round(base)).toLocaleString('es-CL') + ')' : '');
       celda.className = 'td-costo' + (i >= 5 ? ' costo-alto' : '');
@@ -1188,6 +1239,7 @@
       document.getElementById('res-detalle-tasa').textContent = '—';
       document.getElementById('res-detalle-im').textContent = '—';
       document.getElementById('res-tramo').textContent = '—';
+      document.getElementById('formula-calculo').innerHTML = '';
       aviso.style.display = 'none';
       limpiarTramos();
       actualizarTablaIM(null);
@@ -1229,7 +1281,6 @@
     document.getElementById('res-tasa-total').textContent = tasaTotal.toLocaleString('es-CL');
 
     const fmt2 = v => v.toFixed(2).replace('.', ',');
-    const detallesIT = [t1, t2, t3].map((v, i) => `P${i+1}: ${fmt2(v ?? 0)}`).join(' · ');
     // Texto IT
     document.getElementById('res-detalle-tasa').textContent =
       `Licencias: P1 ${fmt2(t1??0)} · P2 ${fmt2(t2??0)} · P3 ${fmt2(t3??0)} → promedio ${fmt2(tsITcrudo)} → Tasa IT: ${tsIT}`;
@@ -1247,6 +1298,8 @@
       tramoFinal.tasa.toFixed(2).replace('.', ',') + '%';
     document.getElementById('res-tramo').textContent =
       'Tramo: ' + tramoFinal.label + (recargo ? ' ⚠ +1 recargo' : '');
+
+    actualizarFormulaCalculo({ t1, t2, t3, tsITcrudo, tsIT, im1, im2, im3, promedioFactorIM, tasaIM, tasaTotal });
 
     const box = document.getElementById('box-cotizacion');
     box.className = 'result-box cotizacion';
@@ -1317,7 +1370,11 @@
       return;
     }
 
-    const metaTramo = TRAMOS.find(t => metaVal >= t.min && metaVal < t.max) || TRAMOS[TRAMOS.length - 1];
+    // La cotización de la meta debe considerar el recargo activo, igual que la real
+    const recargoHero = document.getElementById('chk-recargo')?.checked ?? false;
+    let metaIdx = TRAMOS.findIndex(t => metaVal >= t.min && metaVal < t.max);
+    if (metaIdx < 0) metaIdx = TRAMOS.length - 1;
+    const metaTramo = recargoHero ? TRAMOS[Math.min(metaIdx + 1, TRAMOS.length - 1)] : TRAMOS[metaIdx];
     const metaCotizTxt = metaTramo.tasa.toFixed(2).replace('.', ',') + '%';
 
     // ── Caso A: la meta ya es imposible de cumplir aun con 0 días en P3 ──
@@ -1342,17 +1399,25 @@
     barWrap.style.display = 'block';
     const boxColchonClass = document.getElementById('box-colchon').className;
 
-    // ── Caso B: el Período 3 ya excedió el máximo permitido ──
+    // ── Caso B: el Período 3 ya excedió el máximo permitido según TU META ──
+    // Ojo: esto puede pasar sin que cambie tu cotización real, si la meta no
+    // coincide con un límite de tramo (ej. meta=63 y tramo real es 33-64).
     if (colchonSub.includes('ya superada')) {
       const deficit = Math.abs(parseInt(colchonTxt.replace(/\D/g, ''), 10)) || 0;
       const defSing = deficit === 1;
+      const mismaCotiz = metaCotizTxt === cotizTxt;
       heroCard.className = 'card hero-card exceeded';
       leadEl.textContent = '✖ Debes reducir';
       kpiVal.textContent = deficit.toLocaleString('es-CL');
-      kpiLbl.textContent = `${defSing ? 'día perdido' : 'días perdidos'} en el Período 3 para volver a ${metaCotizTxt}`;
-      recEl.innerHTML =
-        `⚠️ Límite del Período 3 superado en <strong>${deficit.toLocaleString('es-CL')} ${defSing ? 'día' : 'días'}</strong>. ` +
-        `Reduce al menos esa cantidad para volver a la cotización de ${metaCotizTxt}.`;
+      kpiLbl.textContent = mismaCotiz
+        ? `${defSing ? 'día perdido' : 'días perdidos'} sobre tu meta interna (tu cotización sigue en ${cotizTxt})`
+        : `${defSing ? 'día perdido' : 'días perdidos'} en el Período 3 para volver a ${metaCotizTxt}`;
+      recEl.innerHTML = mismaCotiz
+        ? `⚠️ Superaste tu <strong>meta interna</strong> en <strong>${deficit.toLocaleString('es-CL')} ${defSing ? 'día' : 'días'}</strong>, ` +
+          `pero tu cotización real <strong>no cambió</strong> — sigues en el tramo ${tramoTxt} (${cotizTxt}). ` +
+          `Solo subirá si sigues sumando días perdidos y cambias de tramo.`
+        : `⚠️ Límite del Período 3 superado en <strong>${deficit.toLocaleString('es-CL')} ${defSing ? 'día' : 'días'}</strong>. ` +
+          `Reduce al menos esa cantidad para volver a la cotización de ${metaCotizTxt}.`;
       document.getElementById('hero-bar-fill').style.width = '0%';
       document.getElementById('hero-bar-excess').style.width = '100%';
       document.getElementById('hero-bar-usado').textContent = `Excedido en ${deficit.toLocaleString('es-CL')} ${defSing ? 'día' : 'días'}`;
@@ -1477,7 +1542,7 @@
       const culpaIM = tsIM >= tsIT_mejorCaso;
 
       resVal.textContent = '¡Superada!';
-      resSub.textContent = `Supera la meta en ${deficitPts} pts aun con 0 días en P3` +
+      resSub.textContent = `Supera la meta en ${deficitPts.toLocaleString('es-CL')} pts aun con 0 días en P3` +
         (culpaIM ? ' — por Invalideces/Muertes' : ' — por P1+P2');
       box.className = 'result-box colchon exceeded';
       ocultarInsights();
@@ -1507,10 +1572,14 @@
     document.getElementById('insight-panel').style.display = detalleAbierto ? 'grid' : 'none';
 
     // — Meta
-    const metaTramo = TRAMOS.find(t => meta >= t.min && meta < t.max) || TRAMOS[TRAMOS.length-1];
+    const recargoIns = document.getElementById('chk-recargo')?.checked ?? false;
+    let metaIdxIns = TRAMOS.findIndex(t => meta >= t.min && meta < t.max);
+    if (metaIdxIns < 0) metaIdxIns = TRAMOS.length - 1;
+    const metaTramo = recargoIns ? TRAMOS[Math.min(metaIdxIns + 1, TRAMOS.length - 1)] : TRAMOS[metaIdxIns];
     document.getElementById('ins-meta').textContent = meta.toLocaleString('es-CL');
     document.getElementById('ins-meta-desc').textContent =
-      `Si la tasa total no supera ${meta}, la cotización adicional es ${metaTramo.tasa.toFixed(2).replace('.',',')}%`;
+      `Si la tasa total no supera ${meta}, la cotización adicional es ${metaTramo.tasa.toFixed(2).replace('.',',')}%` +
+      (recargoIns ? ' (incluye recargo +1 tramo)' : '');
 
     // — Desglose IT/IM split bar (composición REAL de la tasa total actual,
     //   no la meta — metaIT es solo un valor auxiliar para el cálculo del colchón)
@@ -1701,6 +1770,7 @@
     ocultarInsights();
     limpiarTramos();
     actualizarTablaIM(null);
+    if (tramosAbierto) toggleTramos(); // volver a la vista compacta de 5 tramos
     dibujarGrafico(null, null);
     actualizarHero();
   }
