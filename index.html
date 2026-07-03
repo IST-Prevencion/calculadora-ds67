@@ -1379,14 +1379,15 @@
 
     // ── Caso A: la meta ya es imposible de cumplir aun con 0 días en P3 ──
     // (puede deberse a los accidentes de P1+P2, o a las Invalideces/Muertes — colchonSub ya trae el detalle)
-    if (colchonTxt === '¡Superada!') {
+    // El margen de días (colchonTxt) igual se muestra, aunque sea negativo.
+    if (colchonSub.includes('Imposible cumplir')) {
       const esPorIM = colchonSub.includes('Invalideces');
-      const deficitMatch = colchonSub.match(/en ([\d,.]+) pts/);
+      const deficitMatch = colchonSub.match(/\(([\d,.]+) pts/);
       const deficitTxt = deficitMatch ? deficitMatch[1] : '';
       heroCard.className = 'card hero-card exceeded';
       leadEl.textContent = '✖ Meta superada';
-      kpiVal.textContent = deficitTxt || '—';
-      kpiLbl.textContent = 'pts sobre la meta, aun con 0 días en P3';
+      kpiVal.textContent = colchonTxt;
+      kpiLbl.textContent = 'días de margen — meta ya imposible este período';
       recEl.innerHTML = esPorIM
         ? `⚠️ La meta ya se superó en <strong>${deficitTxt} pts</strong> por las <strong>Incapacidades/Muertes</strong> ` +
           `registradas, sin importar los días perdidos. Reduce casos de invalidez o sube la meta.`
@@ -1531,29 +1532,22 @@
     const totalDiasUsados = diasUsadosP1P2 + diasActual;
     const totalMax = Math.floor((t1 / 100) * masa1v) + Math.floor((t2 / 100) * masa2v) + Math.floor(Math.max(0, diasMax));
 
-    // ── Caja colchón ─────────────────────────────────────────────
+    // ── Caja colchón — SIEMPRE muestra un número de días (puede ser negativo) ──
+    const pctUsadoPreview = diasMax > 0 ? (diasActual / diasMax) * 100 : 0;
+    resVal.textContent = Math.floor(colchon).toLocaleString('es-CL');
+
     if (t3Max < 0) {
-      // Tasa mínima posible: la que resultaría con 0 días perdidos en el Período 3
-      // (mejor caso posible). Si igual supera la meta, es matemáticamente imposible
-      // cumplirla este ciclo — y hay que decir POR QUÉ (IT de P1/P2 o IM).
+      // Meta imposible de cumplir este ciclo, incluso con 0 días perdidos en P3.
+      // Igual mostramos el número (negativo) del margen, y explicamos POR QUÉ
+      // (IT de P1/P2 o IM) para que el usuario sepa dónde actuar.
       const tsIT_mejorCaso = Math.round((t1 + t2 + 0) / 3);
       const tasaMinima = tsIT_mejorCaso + tsIM;
       const deficitPts = Math.round((tasaMinima - meta) * 100) / 100;
       const culpaIM = tsIM >= tsIT_mejorCaso;
-
-      resVal.textContent = '¡Superada!';
-      resSub.textContent = `Supera la meta en ${deficitPts.toLocaleString('es-CL')} pts aun con 0 días en P3` +
+      resSub.textContent = `Imposible cumplir la meta este período (${deficitPts.toLocaleString('es-CL')} pts sobre, aun con 0 días)` +
         (culpaIM ? ' — por Invalideces/Muertes' : ' — por P1+P2');
       box.className = 'result-box colchon exceeded';
-      ocultarInsights();
-      dibujarGrafico(totalDiasUsados, totalDiasUsados);
-      return;
-    }
-
-    // Semáforo de riesgo según % del margen ya usado (no solo un umbral)
-    const pctUsadoPreview = diasMax > 0 ? (diasActual / diasMax) * 100 : 0;
-    resVal.textContent = Math.floor(colchon).toLocaleString('es-CL');
-    if (colchon < 0) {
+    } else if (colchon < 0) {
       resSub.textContent = `Meta ya superada (máx: ${Math.floor(diasMax)})`;
       box.className = 'result-box colchon exceeded';
     } else if (pctUsadoPreview >= 85) {
