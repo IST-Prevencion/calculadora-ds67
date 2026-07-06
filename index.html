@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DS67 - Calculador Tasa Cotización Adicional</title>
+  <title>DS67 — Calculador Tasa de Cotización Adicional</title>
   <style>
     /*
      * ════════════════════════════════════════════════════
@@ -30,7 +30,7 @@
     /* ── LAYOUT ──────────────────────────────────────────── */
     .page {
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
       height: 100vh;
     }
 
@@ -69,7 +69,6 @@
       display: block; font-size: 0.62rem; color: #5E1378; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.4px;
     }
-    .meta-bar-label span:last-child { font-size: 0.72rem; color: #64748b; }
 
     .meta-bar input {
       width: 96px; padding: 5px 10px;
@@ -93,25 +92,6 @@
       animation: none;
     }
     .meta-bar input.invalida { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
-
-    .meta-bar-stack { display: flex; flex-direction: column; gap: 3px; }
-    #meta-bar-cotiz .meta-bar-stack select,
-    #meta-bar-cotiz .meta-bar-stack input {
-      width: 168px; padding: 3px 8px;
-      border: 2px solid #FF7C00; border-radius: 5px;
-      font-size: 0.72rem; font-weight: 700; text-align: center;
-      background: white; color: #5E1378;
-    }
-    #meta-bar-cotiz .meta-bar-stack input::placeholder { color: #94a3b8; font-size: 0.66rem; font-weight: 400; }
-    #meta-bar-cotiz .meta-bar-stack input:placeholder-shown,
-    #meta-bar-cotiz .meta-bar-stack select.vacio {
-      animation: pulso-campo 1.6s ease-in-out infinite;
-    }
-    #meta-bar-cotiz .meta-bar-stack input:focus,
-    #meta-bar-cotiz .meta-bar-stack select:focus {
-      outline: none; border-color: #FF9A3D;
-      box-shadow: 0 0 0 2px rgba(255,124,0,0.25); animation: none;
-    }
 
     .btn-reset {
       padding: 6px 14px; background: #fff; color: #5E1378;
@@ -241,16 +221,14 @@
     .periodo-anio { font-size: 0.6rem; font-weight: 400; color: #F0BEE0; text-transform: none; letter-spacing: 0; }
     .periodo-anio.abierto { color: #ffd9c4; font-weight: 700; }
 
-    /* ── BOTÓN MOSTRAR/OCULTAR COSTOS ─────────────────────── */
-    .btn-costos {
-      font-size: 0.66rem; font-weight: 700; padding: 5px 11px;
-      border: 1.5px solid #FF7C00; border-radius: 5px;
-      background: #FDF2ED; color: #CC5200; cursor: pointer;
+    /* ── BOTÓN ANÁLISIS SITUACIÓN ACTUAL (discreto, en desarrollo) ── */
+    .btn-analisis {
+      font-size: 0.64rem; font-weight: 600; padding: 4px 10px;
+      border: 1px solid #dde3ec; border-radius: 5px;
+      background: #f7f9fc; color: #64748b; cursor: pointer;
       white-space: nowrap; transition: background 0.15s, color 0.15s;
     }
-    .btn-costos:hover { background: #FF7C00; color: #fff; }
-    .btn-costos.oculto { background: #FF7C00; color: #fff; }
-    .btn-costos.oculto:hover { background: #CC5200; }
+    .btn-analisis:hover { background: #eef2f9; color: #5E1378; }
 
     /* ── RESULT BOXES ────────────────────────────────────── */
     .results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; }
@@ -362,17 +340,15 @@
     }
     .btn-toggle-formula:hover { background: #eef2f9; color: #5E1378; }
 
-    /* ── TABLA LOOKUP FACTOR IM → TASA IM ─────────────────── */
-    .tabla-im-lookup { margin-top: 7px; }
-    .tabla-im-mini { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
-    .tabla-im-mini th {
-      background: #5E1378; color: #fff; padding: 4px 8px;
-      font-size: 0.65rem; text-align: left;
+    /* ── ANÁLISIS SITUACIÓN ACTUAL (en desarrollo) ────────── */
+    .analisis-texto {
+      margin-top: 7px; font-size: 0.7rem; line-height: 1.5; color: #334155;
+      background: #f7f9fc; border-left: 3px solid #b0c0d8;
+      border-radius: 0 4px 4px 0; padding: 6px 9px;
     }
-    .tabla-im-mini th:last-child { text-align: center; width: 70px; }
-    .tabla-im-mini td { padding: 3px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; }
-    .tabla-im-mini td:last-child { text-align: center; font-weight: 700; color: #D1278C; }
-    .tabla-im-mini tr:nth-child(even) td { background: #f7f9fc; }
+    .analisis-texto strong { color: #5E1378; }
+
+    /* ── TABLA LOOKUP FACTOR IM → TASA IM ─────────────────── */
     .tabla-im-nota {
       font-size: 0.62rem; color: #64748b; background: #f7f9fc;
       border-left: 3px solid #FF7C00; padding: 4px 8px;
@@ -525,32 +501,6 @@
       html, body { overflow: auto; }
     }
 
-    /* ── CHART ───────────────────────────────────────────── */
-    .chart-card { flex-shrink: 0; }
-
-    .chart-inner { display: flex; align-items: center; gap: 14px; }
-
-    #grafico-dona { flex-shrink: 0; }
-
-    .chart-legend { display: flex; flex-direction: column; gap: 5px; flex: 1; }
-
-    .legend-item {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 0.72rem; color: #475569;
-    }
-
-    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-
-    .legend-text strong { color: #1e293b; }
-
-    .legend-pct { font-size: 1.2rem; font-weight: 700; color: #5E1378; margin-top: 2px; }
-
-    /* ── RESUMEN ESCRITO ─────────────────────────────────── */
-    .resumen-texto {
-      font-size: 0.78rem; line-height: 1.55; color: #334155;
-    }
-    .resumen-texto strong { color: #5E1378; }
-
     /* ── HERO CARD (KPI principal) ────────────────────────── */
     .hero-card {
       background: linear-gradient(135deg, #eef2f9 0%, #f7f9fc 100%);
@@ -565,8 +515,8 @@
 
     .hero-kpi { text-align: left; }
     .hero-lead {
-      font-size: 0.85rem; font-weight: 700; color: #5E1378; margin-bottom: 1px;
-      min-height: 1.1em;
+      font-size: 0.85rem; font-weight: 700; color: #5E1378; margin-bottom: 6px;
+      min-height: 1.1em; max-width: 360px; line-height: 1.35;
     }
     .hero-card.warning  .hero-lead { color: #b45309; }
     .hero-card.tight    .hero-lead { color: #c2410c; }
@@ -589,6 +539,10 @@
     .hero-bar-fill { height: 100%; background: #15803d; transition: width 0.3s ease; }
     .hero-bar-excess { height: 100%; background: #b91c1c; transition: width 0.3s ease; }
     .hero-bar-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: #64748b; margin-top: 3px; }
+    .hero-bar-dot {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      margin-right: 4px; vertical-align: middle;
+    }
 
     .hero-recomendacion {
       margin-top: 10px; font-size: 0.75rem; line-height: 1.5; color: #334155;
@@ -620,7 +574,7 @@
       .left-col, .right-col { overflow: visible !important; }
       .left-col { overflow-y: visible !important; }
       .tramos-scroll-wrap { max-height: none !important; overflow: visible !important; }
-      .btn-pdf, .btn-reset, #btn-toggle-costo, .btn-toggle-tramos, .btn-toggle-formula { display: none !important; }
+      .btn-pdf, .btn-reset, .btn-analisis, .btn-toggle-tramos, .btn-toggle-formula { display: none !important; }
       .card { break-inside: avoid; box-shadow: none !important; }
       /* El aviso legal debe verse claro en el PDF impreso, no solo en pantalla */
       .disclaimer-bar {
@@ -646,19 +600,6 @@
       </div>
     </div>
 
-    <div class="meta-bar" id="meta-bar-cotiz">
-      <span class="meta-bar-icon">💰</span>
-      <div class="meta-bar-label">
-        <span>Cotización Actual</span>
-      </div>
-      <div class="meta-bar-stack">
-        <select id="tasa-actual-select" onchange="actualizarCostoTramos()">
-          <option value="">Tu tasa actual</option>
-        </select>
-        <input type="number" id="monto-actual" min="0" step="1" placeholder="ej: 500000 (lo que pagas)" oninput="actualizarCostoTramos()">
-      </div>
-    </div>
-
     <div class="meta-bar">
       <span class="meta-bar-icon">🎯</span>
       <div class="meta-bar-label">
@@ -666,7 +607,7 @@
       </div>
       <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
         <span style="font-size:0.62rem; color:#CC5200; font-weight:700; text-transform:uppercase; letter-spacing:0.4px;">Tasa total a no superar</span>
-        <input type="number" id="meta-tasa" min="0" step="0.01" placeholder="ej: 63" oninput="recalcular()">
+        <input type="number" id="meta-tasa" min="0" step="0.01" placeholder="ej: 64" oninput="recalcular()">
       </div>
     </div>
 
@@ -676,7 +617,7 @@
 
   <!-- ── AVISO LEGAL ──────────────────────────────────────── -->
   <div class="disclaimer-bar">
-    ⚠️ <strong>Esta herramienta es solo una proyección referencial</strong> — no constituye un dato oficial ni reemplaza la evaluación de siniestralidad emitida por el Organismo Administrador (IST) o la autoridad correspondiente. Úsala como apoyo interno, no como documento válido ante fiscalización.
+    ⚠️ <strong>Proyección referencial según DS67</strong> — no reemplaza la evaluación oficial ni es válida ante fiscalización.
   </div>
 
   <!-- ── MAIN ─────────────────────────────────────────────── -->
@@ -689,9 +630,9 @@
       <div class="card hero-card" id="card-hero">
         <div class="hero-main">
           <div class="hero-kpi">
-            <div class="hero-lead" id="hero-lead"></div>
+            <div class="hero-lead" id="hero-lead">esperando datos</div>
             <div class="hero-value" id="hero-dias">—</div>
-            <div class="hero-label" id="hero-label">días disponibles</div>
+            <div class="hero-label" id="hero-label"></div>
           </div>
           <div class="hero-secondary">
             <div class="hero-sec-item"><span>Tasa Siniestralidad</span><strong id="hero-tasa">—</strong></div>
@@ -827,9 +768,18 @@
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <h2 style="margin-bottom:0">Tabla de Tramos — Cotización Adicional DS67</h2>
-          <button id="btn-toggle-costo" class="btn-costos" onclick="toggleCostoCol()">
-            💰 Ocultar costos $
+          <button id="btn-analisis" class="btn-analisis" onclick="toggleAnalisisSituacion()">
+            📊 Análisis situación actual
           </button>
+        </div>
+        <div id="analisis-wrap" style="display:none; margin-bottom:8px;">
+          <div style="display:flex; gap:6px;">
+            <select id="tasa-actual-select" onchange="actualizarCostoTramos()" style="flex:1; padding:4px 6px; border:1px solid #c8d3e0; border-radius:4px; font-size:0.72rem;">
+              <option value="">Tu tasa actual</option>
+            </select>
+            <input type="number" id="monto-actual" min="0" step="1" placeholder="ej: 500000 (lo que pagas)" oninput="actualizarCostoTramos()" style="flex:1; padding:4px 6px; border:1px solid #c8d3e0; border-radius:4px; font-size:0.72rem;">
+          </div>
+          <div class="analisis-texto" id="analisis-texto">Ingresa tu tasa y monto actuales para comparar tu situación real contra la meta y contra lo proyectado.</div>
         </div>
         <div class="tramos-scroll-wrap">
         <table class="tabla-tramos">
@@ -907,11 +857,13 @@
         </div>
       </div>
 
-      <div class="card">
-        <h2>Resultados</h2>
+      <div class="card" id="card-detalle" style="display:none">
+        <h2>Detalle del Cálculo</h2>
 
-        <!-- Fila principal: 3 KPIs -->
-        <div class="results-grid">
+        <!-- Estos 3 KPIs ya se muestran en el hero de arriba (número grande + fila
+             Tasa/Tramo/Cotización) — se mantienen aquí ocultos solo porque el hero
+             y el análisis leen estos valores desde el DOM. No se duplican visualmente. -->
+        <div class="results-grid" style="display:none">
           <div class="result-box tasa-total">
             <div class="result-label">Tasa Total Siniestralidad</div>
             <div class="result-value" id="res-tasa-total">—</div>
@@ -931,7 +883,7 @@
         </div>
 
         <!-- Panel de detalle meta (visible solo con meta + datos) -->
-        <button class="btn-toggle-formula" id="btn-detalle" onclick="toggleDetalle()" style="display:none; margin-top:8px;">
+        <button class="btn-toggle-formula" id="btn-detalle" onclick="toggleDetalle()" style="display:none;">
           ▼ Ver detalle del cálculo
         </button>
         <div class="insight-grid" id="insight-panel" style="display:none">
@@ -980,13 +932,6 @@
           </div>
 
         </div>
-
-        <!-- Conservar IDs legacy para compatibilidad con JS antiguo -->
-        <span id="prog-label-izq" style="display:none"></span>
-        <span id="prog-label-der" style="display:none"></span>
-        <div id="progress-wrap" style="display:none"></div>
-        <span id="ins-dias-max" style="display:none"></span>
-        <span id="ins-dias-max-sub" style="display:none"></span>
 
       </div>
 
@@ -1096,21 +1041,20 @@
       : '▼ Ver metodología / fórmulas';
   }
 
-  // ── TOGGLE: Tramos extra ─────────────────────────────────
-  let costosVisibles = true;
-  function toggleCostoCol() {
-    costosVisibles = !costosVisibles;
-    // Mostrar/ocultar th y todas las celdas td-costo
+  // ── TOGGLE: Análisis situación actual (tasa + monto que pagas hoy) ──
+  // Oculto por defecto a propósito, mientras se termina de construir el análisis.
+  let analisisAbierto = false;
+  function toggleAnalisisSituacion() {
+    analisisAbierto = !analisisAbierto;
+    document.getElementById('analisis-wrap').style.display = analisisAbierto ? 'block' : 'none';
+    document.getElementById('btn-analisis').textContent = analisisAbierto
+      ? '📊 Ocultar análisis'
+      : '📊 Análisis situación actual';
+    // Mostrar/ocultar la columna de costo mensual en la tabla de tramos
     document.querySelectorAll('.td-costo, #th-costo').forEach(el => {
-      el.style.display = costosVisibles ? '' : 'none';
+      el.style.display = analisisAbierto ? '' : 'none';
     });
-    // Mostrar/ocultar el input de cotización base en el header
-    const barCotiz = document.getElementById('meta-bar-cotiz');
-    if (barCotiz) barCotiz.style.display = costosVisibles ? '' : 'none';
-    // Actualizar texto del botón
-    const btnCostos = document.getElementById('btn-toggle-costo');
-    btnCostos.textContent = costosVisibles ? '💰 Ocultar costos $' : '💰 Mostrar costos $';
-    btnCostos.classList.toggle('oculto', !costosVisibles);
+    actualizarCostoTramos();
   }
 
   let tramosAbierto = false;
@@ -1260,7 +1204,6 @@
     const filas    = document.querySelectorAll('#tabla-tramos-body tr');
     const valido   = !isNaN(tasaSel) && !isNaN(monto) && monto > 0;
 
-    selEl.classList.toggle('vacio', selEl.value === '');
 
     const baseImponible = valido ? monto / (tasaSel / 100) : null;
 
@@ -1281,6 +1224,61 @@
       // Verde si baja de costo (mejor tramo), rojo si sube (peor tramo) — relativo a TU tasa actual, no a la posición en la tabla
       celda.className = 'td-costo' + (diff > 0 ? ' costo-alto' : '') + (esActual ? ' costo-actual' : '');
     });
+
+    actualizarAnalisisSituacion(valido ? tasaSel : null);
+  }
+
+  // Compara 3 puntos de referencia: tu tasa actual (lo que pagas hoy),
+  // lo proyectado con los datos ingresados, y tu meta objetivo.
+  function actualizarAnalisisSituacion(tasaSel) {
+    const texto = document.getElementById('analisis-texto');
+    if (!texto) return;
+
+    if (tasaSel === null) {
+      texto.textContent = 'Ingresa tu tasa y monto actuales para comparar tu situación real contra la meta y contra lo proyectado.';
+      return;
+    }
+
+    const cotizProyTxt = document.getElementById('res-cotizacion').textContent;
+    if (cotizProyTxt === '—') {
+      texto.innerHTML = `Tu tasa actual es <strong>${tasaSel.toFixed(2).replace('.', ',')}%</strong>. ` +
+        `Completa los datos de los 3 períodos para ver la comparación con lo proyectado.`;
+      return;
+    }
+
+    const tramoProyTxt = document.getElementById('res-tramo').textContent.replace('Tramo: ', '').replace(/ ⚠.*/, '');
+    const tasaSelTxt = tasaSel.toFixed(2).replace('.', ',') + '%';
+    // "tasaSel" viene del selector y es el TOTAL a pagar (0,93% base + adicional).
+    // "res-cotizacion" en cambio solo muestra el Adicional DS67 — hay que sumarle
+    // la base para comparar peras con peras.
+    const adicionalProyNum = parseFloat(cotizProyTxt.replace(',', '.'));
+    const cotizProyTotal = adicionalProyNum + 0.93;
+    const cotizProyTotalTxt = cotizProyTotal.toFixed(2).replace('.', ',') + '%';
+    const partes = [];
+
+    if (Math.abs(cotizProyTotal - tasaSel) < 0.005) {
+      partes.push(`Con los datos ingresados, tu cotización <strong>se mantendría igual</strong> a la actual (${tasaSelTxt}).`);
+    } else if (cotizProyTotal > tasaSel) {
+      partes.push(`Con los datos ingresados, <strong>subirías</strong> de ${tasaSelTxt} a <strong>${cotizProyTotalTxt}</strong> (tramo ${tramoProyTxt}).`);
+    } else {
+      partes.push(`Con los datos ingresados, <strong>bajarías</strong> de ${tasaSelTxt} a <strong>${cotizProyTotalTxt}</strong> (tramo ${tramoProyTxt}).`);
+    }
+
+    const metaVal = val('meta-tasa');
+    if (metaVal !== null) {
+      let metaIdx = TRAMOS.findIndex(t => metaVal >= t.min && metaVal < t.max);
+      if (metaIdx < 0) metaIdx = TRAMOS.length - 1;
+      const recargoAn = document.getElementById('chk-recargo')?.checked ?? false;
+      const metaTramo = recargoAn ? TRAMOS[Math.min(metaIdx + 1, TRAMOS.length - 1)] : TRAMOS[metaIdx];
+      const metaTotal = metaTramo.tasa + 0.93;
+      const metaTotalTxt = metaTotal.toFixed(2).replace('.', ',') + '%';
+
+      partes.push(cotizProyTotal > metaTotal + 0.005
+        ? `Eso <strong>supera tu meta</strong> (${metaTotalTxt}).`
+        : `Eso está <strong>dentro de tu meta</strong> (${metaTotalTxt}).`);
+    }
+
+    texto.innerHTML = partes.join(' ');
   }
 
   function recalcular() {
@@ -1309,6 +1307,7 @@
       actualizarTablaIM(null);
       actualizarColchon(null, null, null);
       actualizarHero();
+      actualizarCostoTramos();
       return;
     }
 
@@ -1375,6 +1374,7 @@
     // El colchón usa la Tasa IM (valor de tabla, fijo)
     actualizarColchon(t1, t2, t3, tasaIM, tsIT);
     actualizarHero();
+    actualizarCostoTramos();
   }
 
   // ── HERO: KPI principal + recomendación + barra de margen ────
@@ -1385,9 +1385,9 @@
 
     if (tasaTotalTxt === '—') {
       heroCard.className = 'card hero-card';
-      document.getElementById('hero-lead').textContent = '';
+      document.getElementById('hero-lead').textContent = 'esperando datos';
       document.getElementById('hero-dias').textContent = '—';
-      document.getElementById('hero-label').textContent = 'esperando datos';
+      document.getElementById('hero-label').textContent = '';
       document.getElementById('hero-tasa').textContent  = '—';
       document.getElementById('hero-tramo').textContent = '—';
       document.getElementById('hero-cotiz').textContent = '—';
@@ -1416,9 +1416,9 @@
 
     if (metaVal === null) {
       heroCard.className = 'card hero-card';
-      leadEl.textContent = '';
+      leadEl.textContent = 'puntos de Tasa Siniestralidad';
       kpiVal.textContent = tasaTotalTxt;
-      kpiLbl.textContent = 'puntos de Tasa Siniestralidad';
+      kpiLbl.textContent = '';
       recEl.innerHTML = '💡 Ingresa una <span class="link-campo" onclick="irACampo(\'meta-tasa\')">Meta Objetivo</span> arriba para ver cuántos días de margen quedan disponibles.';
       barWrap.style.display = 'none';
       return;
@@ -1426,9 +1426,9 @@
 
     if (colchonTxt === '—') {
       heroCard.className = 'card hero-card';
-      leadEl.textContent = '';
+      leadEl.textContent = 'días disponibles';
       kpiVal.textContent = '—';
-      kpiLbl.textContent = 'días disponibles';
+      kpiLbl.textContent = '';
       recEl.textContent = '💡 ' + colchonSub;
       barWrap.style.display = 'none';
       return;
@@ -1449,9 +1449,9 @@
       const deficitMatch = colchonSub.match(/\(([\d,.]+) pts/);
       const deficitTxt = deficitMatch ? deficitMatch[1] : '';
       heroCard.className = 'card hero-card exceeded';
-      leadEl.textContent = '✖ Meta superada';
+      leadEl.textContent = '✖ Meta superada — margen de días ya imposible este período';
       kpiVal.textContent = colchonTxt;
-      kpiLbl.textContent = 'días de margen — meta ya imposible este período';
+      kpiLbl.textContent = '';
       recEl.innerHTML = esPorIM
         ? `⚠️ La meta ya se superó en <strong>${deficitTxt} pts</strong> por las <strong>Incapacidades/Muertes</strong> ` +
           `registradas, sin importar los días perdidos. Reduce casos de invalidez o sube la meta.`
@@ -1470,13 +1470,14 @@
     if (colchonSub.includes('ya superada')) {
       const deficit = Math.abs(parseInt(colchonTxt.replace(/\D/g, ''), 10)) || 0;
       const defSing = deficit === 1;
+      const defTxt  = deficit.toLocaleString('es-CL');
       const mismaCotiz = metaCotizTxt === cotizTxt;
       heroCard.className = 'card hero-card exceeded';
-      leadEl.textContent = '✖ Debes reducir';
-      kpiVal.textContent = deficit.toLocaleString('es-CL');
-      kpiLbl.textContent = mismaCotiz
-        ? `${defSing ? 'día perdido' : 'días perdidos'} sobre tu meta interna (tu cotización sigue en ${cotizTxt})`
-        : `${defSing ? 'día perdido' : 'días perdidos'} en el Período 3 para volver a ${metaCotizTxt}`;
+      leadEl.textContent = mismaCotiz
+        ? `✖ Superaste tu meta interna en ${defTxt} ${defSing ? 'día' : 'días'} (tu cotización sigue en ${cotizTxt})`
+        : `✖ Debes reducir ${defTxt} ${defSing ? 'día perdido' : 'días perdidos'} en el Período 3 para volver a ${metaCotizTxt}`;
+      kpiVal.textContent = defTxt;
+      kpiLbl.textContent = '';
       recEl.innerHTML = mismaCotiz
         ? `⚠️ Superaste tu <strong>meta interna</strong> en <strong>${deficit.toLocaleString('es-CL')} ${defSing ? 'día' : 'días'}</strong>, ` +
           `pero tu cotización real <strong>no cambió</strong> — sigues en el tramo ${tramoTxt} (${cotizTxt}). ` +
@@ -1508,6 +1509,8 @@
     // porque "Aún estás dentro del tramo" no deja claro que ya bajaste de tramo.
     const bajoDeTramo = tramoTxt !== metaTramo.label;
 
+    // Arriba: frase corta (estado + acción). El detalle del % usado y el impacto
+    // económico exacto ya se explican abajo (hero-recomendacion) y en la barra.
     const fraseEstado = bajoDeTramo
       ? `📉 Ya bajaste de tramo (${cotizTxt})`
       : estado === ' ok'
@@ -1515,9 +1518,10 @@
       : estado === ' warning'
       ? '⚠ Te estás acercando al límite'
       : '⚠ Estás muy cerca del límite';
-    leadEl.textContent = fraseEstado;
+    leadEl.textContent = fraseEstado +
+      ` — puedes registrar ${colchonTxt} ${diaPalabra} perdido${esSingular ? '' : 's'} más sin aumentar la cotización`;
     kpiVal.textContent = colchonTxt;
-    kpiLbl.textContent = (esSingular ? 'día perdido más' : 'días perdidos más') + ' sin aumentar la cotización';
+    kpiLbl.textContent = '';
 
     // El ícono y el tono del mensaje siguen el mismo semáforo que el resto de la tarjeta
     const iconoRec = bajoDeTramo ? '📉' : estado === ' ok' ? '✅' : '⚠️';
@@ -1525,24 +1529,44 @@
     const notaTramo = bajoDeTramo
       ? `Ya pasaste del tramo de tu meta (${metaCotizTxt}) a uno mejor: <strong>${tramoTxt} (${cotizTxt})</strong>. `
       : '';
+    // Mensaje corto: dice el tramo y la cotización EXACTA a la que subirías, en vez
+    // de la frase genérica "pasará al siguiente tramo" (ya se ve en la tabla, pero
+    // decirlo aquí también evita tener que ir a buscarlo).
+    const idxTramoActual = TRAMOS.findIndex(t => t.label === tramoTxt);
+    const yaEsUltimoTramo = idxTramoActual === TRAMOS.length - 1;
+    const tramoSiguiente = (idxTramoActual >= 0 && !yaEsUltimoTramo)
+      ? TRAMOS[idxTramoActual + 1]
+      : null;
+    // Gatillo exacto: el colchón son los días que SÍ puedes registrar; uno más ya te pasa de tramo.
+    const diasGatillo = (parseInt(colchonTxt.replace(/\D/g, ''), 10) || 0) + 1;
+    const diasGatilloTxt = diasGatillo === 1 ? '1 día' : `${diasGatillo.toLocaleString('es-CL')} días`;
+    const avisoSubida = tramoSiguiente
+      ? `Si registras ${diasGatilloTxt} o más, la cotización subirá de ${cotizTxt} a ${tramoSiguiente.tasa.toFixed(2).replace('.', ',')}%.`
+      : yaEsUltimoTramo
+      ? `Ya estás en el tramo más alto (${cotizTxt}) — no puede subir más.`
+      : `Si lo superas, la empresa pasará al siguiente tramo, aumentando la cotización adicional.`;
     recEl.innerHTML =
       `${iconoRec} ${notaTramo}${prefijoRec}Puedes registrar ${estado === ' ok' ? 'hasta' : 'solo'} ` +
       `<strong>${colchonTxt} ${diaPalabra}</strong> perdido${esSingular ? '' : 's'} adicional${esSingular ? '' : 'es'} ` +
-      `en el Período 3. Si lo superas, la empresa pasará al siguiente tramo, aumentando la cotización adicional.`;
+      `en el Período 3. ${avisoSubida}`;
 
     // Barra de dos colores: verde = días restantes, rojo = días ya usados
     // (el verde se va "comiendo" a medida que se pierden días en el Período 3)
     document.getElementById('hero-bar-fill').style.width = restantePct + '%';
     document.getElementById('hero-bar-excess').style.width = usadoPct + '%';
-    document.getElementById('hero-bar-usado').textContent = `${colchonTxt} ${diaPalabra} restante${esSingular ? '' : 's'} (${restantePct.toFixed(0)}% del margen)`;
-    document.getElementById('hero-bar-max').textContent =
-      'usados: ' + document.getElementById('colchon-usado-num').textContent +
+    // Puntos de color junto a cada etiqueta: aclaran cuál lado de la barra describe cada texto
+    document.getElementById('hero-bar-usado').innerHTML =
+      `<span class="hero-bar-dot" style="background:#15803d"></span>${colchonTxt} ${diaPalabra} restante${esSingular ? '' : 's'} (${restantePct.toFixed(0)}% del margen disponible)`;
+    document.getElementById('hero-bar-max').innerHTML =
+      `<span class="hero-bar-dot" style="background:#b91c1c"></span>usados: ` +
+      document.getElementById('colchon-usado-num').textContent +
       ' / ' + document.getElementById('colchon-max-num').textContent + ' máx.';
   }
 
   function ocultarInsights() {
     document.getElementById('insight-panel').style.display = 'none';
     document.getElementById('btn-detalle').style.display = 'none';
+    document.getElementById('card-detalle').style.display = 'none';
   }
 
   // ── TOGGLE: Detalle del cálculo (panel de 4 stat-cards) ──
@@ -1568,7 +1592,6 @@
       resSub.textContent = 'ingresa la meta arriba';
       box.className = 'result-box colchon';
       ocultarInsights();
-      dibujarGrafico(dias3, null);
       return;
     }
     if (t1 === null || t2 === null) {
@@ -1576,7 +1599,6 @@
       resSub.textContent = 'faltan datos de P1 o P2';
       box.className = 'result-box colchon';
       ocultarInsights();
-      dibujarGrafico(dias3, null);
       return;
     }
     if (masa3 === null || masa3 === 0) {
@@ -1584,7 +1606,6 @@
       resSub.textContent = 'ingresa la Masa del P3';
       box.className = 'result-box colchon';
       ocultarInsights();
-      dibujarGrafico(dias3, null);
       return;
     }
 
@@ -1604,7 +1625,6 @@
 
     const diasUsadosP1P2  = dias1v + dias2v;
     const totalDiasUsados = diasUsadosP1P2 + diasActual;
-    const totalMax = Math.floor((t1 / 100) * masa1v) + Math.floor((t2 / 100) * masa2v) + Math.floor(Math.max(0, diasMax));
 
     // ── Caja colchón — SIEMPRE muestra un número de días (puede ser negativo) ──
     const pctUsadoPreview = diasMax > 0 ? (diasActual / diasMax) * 100 : 0;
@@ -1636,6 +1656,7 @@
     }
 
     // ── Panel de insights (colapsado por defecto, botón para expandir) ──
+    document.getElementById('card-detalle').style.display = 'block';
     document.getElementById('btn-detalle').style.display = 'block';
     document.getElementById('insight-panel').style.display = detalleAbierto ? 'grid' : 'none';
 
@@ -1692,96 +1713,6 @@
     colchonCard.className = 'stat-card stat-colchon' +
       (colchon < 0 ? ' exceeded' : (pctUsado >= 85 ? ' tight' : (pctUsado >= 60 ? ' warning' : '')));
 
-    dibujarGrafico(totalDiasUsados, totalMax);
-  }
-
-  function dibujarGrafico(diasGastados, diasMax) {
-    const canvas = document.getElementById('grafico-dona');
-    if (!canvas) return; // donut removido — reemplazado por barra en hero-card
-    const ctx    = canvas.getContext('2d');
-    const cx = canvas.width  / 2;
-    const cy = canvas.height / 2;
-    const r  = 54;
-    const ri = 32;  // radio interior (dona)
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const legGastados  = document.getElementById('leg-gastados');
-    const legRestantes = document.getElementById('leg-restantes');
-    const legExceso    = document.getElementById('leg-exceso');
-    const itemExceso   = document.getElementById('legend-exceso');
-    const pct          = document.getElementById('legend-pct');
-
-    // Sin datos suficientes — círculo gris vacío
-    if (diasMax === null || diasMax <= 0) {
-      arc(ctx, cx, cy, r, ri, -Math.PI/2, Math.PI*2, '#e2e8f0');
-      legGastados.textContent  = '—';
-      legRestantes.textContent = '—';
-      itemExceso.style.display = 'none';
-      pct.textContent = '—';
-      return;
-    }
-
-    const gastados  = Math.max(0, Math.floor(diasGastados ?? 0));
-    const exceso    = Math.max(0, gastados - Math.floor(diasMax));
-    const gastadosOk = Math.min(gastados, diasMax);
-    const restantes  = Math.max(0, diasMax - gastados);
-    const total      = diasMax + exceso;
-    const pctUsado   = diasMax > 0 ? Math.min((gastados / diasMax) * 100, 999) : 0;
-
-    const startAngle = -Math.PI / 2;
-    let angle = startAngle;
-
-    if (gastadosOk > 0) {
-      const a = (gastadosOk / total) * Math.PI * 2;
-      arc(ctx, cx, cy, r, ri, angle, a, '#FF7C00');
-      angle += a;
-    }
-
-    if (restantes > 0) {
-      const a = (restantes / total) * Math.PI * 2;
-      arc(ctx, cx, cy, r, ri, angle, a, '#5E1378');
-      angle += a;
-    }
-
-    if (exceso > 0) {
-      const a = (exceso / total) * Math.PI * 2;
-      arc(ctx, cx, cy, r, ri, angle, a, '#ef4444');
-    }
-
-    // Si no hay datos de días gastados aún, arco completo gris
-    if (gastados === 0 && restantes > 0) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      arc(ctx, cx, cy, r, ri, -Math.PI/2, Math.PI*2, '#22c55e');
-    }
-
-    legGastados.textContent  = gastadosOk.toLocaleString('es-CL');
-    legRestantes.textContent = restantes.toLocaleString('es-CL');
-
-    if (exceso > 0) {
-      itemExceso.style.display = 'flex';
-      legExceso.textContent = exceso.toLocaleString('es-CL');
-    } else {
-      itemExceso.style.display = 'none';
-    }
-
-    const pctColor = pctUsado >= 100 ? '#b91c1c' : pctUsado >= 85 ? '#c2410c' : '#15803d';
-    pct.style.color = pctColor;
-    pct.textContent = pctUsado.toFixed(1).replace('.', ',') + '% usado';
-  }
-
-  function arc(ctx, cx, cy, r, ri, startAngle, sweep, color) {
-    ctx.beginPath();
-    ctx.moveTo(cx + r * Math.cos(startAngle), cy + r * Math.sin(startAngle));
-    ctx.arc(cx, cy, r,  startAngle, startAngle + sweep);
-    ctx.arc(cx, cy, ri, startAngle + sweep, startAngle, true);
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
-    // separador
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
   }
 
   function actualizarTablaTramos(tasaTotal) {
@@ -1839,8 +1770,8 @@
     ocultarInsights();
     limpiarTramos();
     actualizarTablaIM(null);
-    if (tramosAbierto) toggleTramos(); // volver a la vista compacta de 5 tramos
-    dibujarGrafico(null, null);
+    if (tramosAbierto) toggleTramos();               // volver a la vista compacta de 5 tramos
+    if (analisisAbierto) toggleAnalisisSituacion();  // cerrar el panel de análisis
     actualizarHero();
   }
 
@@ -1863,7 +1794,8 @@
   poblarSelectTasaActual();
   mostrarAniosPeriodos();
   recalcular();
-  toggleCostoCol(); // oculto por defecto
+  // La columna de costo mensual y el panel de análisis empiezan ocultos por defecto
+  document.querySelectorAll('.td-costo, #th-costo').forEach(el => { el.style.display = 'none'; });
 </script>
 </body>
 </html>
